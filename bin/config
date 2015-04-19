@@ -1,0 +1,23 @@
+#!/bin/bash
+eval "$(cat ~/.local/share/shelper.sh || curl suderman.github.io/shelper/shelper.sh)"
+
+# App and Var directory
+APP=$(cd "$(dirname $(dirname "${BASH_SOURCE[0]}"))" && pwd -P)
+VAR=$(cd "$APP/var" && pwd -P)
+
+# Populate environment variables
+source $APP/.env || source $APP/.env-sample
+
+# Default fallbacks
+[ -z "$DOMAIN" ]      && DOMAIN="localhost"
+[ -z "$CA_NAME" ]     && CA_NAME="Certificate Authority"
+[ -z "$CA_EMAIL" ]    && CA_EMAIL="ca@$DOMAIN"
+[ -z "$COUNTRY" ]     && COUNTRY="Country"
+[ -z "$REGION" ]      && REGION="Region"
+[ -z "$CITY" ]        && CITY="City"
+[ -z "$ORG" ]         && ORG="$DOMAIN CA"
+[ -z "$SECURE_PORT" ] && SECURE_PORT="11443"
+[ -z "$PUBLIC_PORT" ] && PUBLIC_PORT="11180"
+[ -z "$OCSP_PORT" ]   && OCSP_PORT="11188"
+[ -z "$CRL_HOST" ]    && CRL_HOST="$DOMAIN:$PUBLIC_PORT"
+[ -z "$OCSP_HOST" ]   && OCSP_HOST="$DOMAIN:$OCSP_PORT"

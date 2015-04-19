@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><%= ca_name %></title>
+
+    <!-- Bootstrap -->
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+      #site { padding: 0px 5px 20px; }
+      h1 { font-size: 33px; padding: 10px; background: lightgray; text-align: center; }
+      .main { text-align: center; }
+      .main a { font-size: 16px; }
+
+      .form-control { padding: 6px 10px; }
+
+      tr.new a { color: gray; line-height: 2em; }
+      tr.new a:hover { text-decoration: none; }
+
+      tr.new td.name a { display: none; }
+      tr.new td.name input { display: block; }
+
+      tr.new.ready td.name a { display: block; }
+
+      tr.new td.name a { display: none; }
+      tr.new.ready td.name input { display: none; }
+
+      tr.new.ready a { color: #428bca; }
+      tr.new.ready a:hover { text-decoration: underline; }
+
+      form.revoke .form-group > div { padding-left: 7px; }
+
+      @media only screen and (max-width : 320px) {
+        tr.cert td.pub { display: none; }
+        tr.cert td.pem { display: none; }
+        tr.cert td.zip { display: none; }
+      }
+      .clear { clear: both; height: 0; }
+      .footer { text-align: center; }
+
+    </style>
+  </head>
+  <body>
+    <div id="site">
+
+      <div class="main">
+        <h1><%= ca_name %></h1>
+        <a class="btn btn-primary btn-lg" href="/ca.crt">Root Certificate</a>
+        <a class="btn btn-default btn-lg" href="/ca.crl">CRL</a>
+        <a class="btn btn-default btn-lg" href="http://ocsp.ca.<%=domain%>/">OCSP</a>
+      </div>
+
+      <% if (private) { %>
+        <h2>Signed Certificates</h2>
+        <table class="table table-striped table-hover">
+          <% if (certs.length) { %>
+              <% certs.forEach(function(cert, index){ %>
+                <% if (cert != "") { %>
+                <tr class="cert">
+                  <td class="name"><a href="/<%= cert %>.zip"><%= cert %></a></td>
+                  <td class="crt"><a href="/<%= cert %>.crt">crt</a></td>
+                  <td class="key"><a href="/<%= cert %>.key">key</a></td>
+                  <td class="pub"><a href="/<%= cert %>.pub">pub</a></td>
+                  <td class="p12"><a href="/<%= cert %>.p12">p12</a></td>
+                  <td class="pem"><a href="/<%= cert %>.pem">pem</a></td>
+                  <td class="zip"><a href="/<%= cert %>.zip">zip</a></td>
+                </tr>
+                <% } %>
+              <% }) %>
+          <% } %>
+          <tr class="new cert">
+            <td class="name"><input type="text" class="form-control" id="new" placeholder="Sign New Certificate"><a></a></td>
+            <td class="crt"><a>crt</a></td>
+            <td class="key"><a>key</a></td>
+            <td class="pub"><a>pub</a></td>
+            <td class="p12"><a>p12</a></td>
+            <td class="pem"><a>pem</a></td>
+            <td class="zip"><a>zip</a></td>
+          </tr>
+        </table>
+
+        <h2>Revoked Certificates</h2>
+        <table class="table table-striped table-hover">
+          <% if (revoked.length) { %>
+              <% revoked.forEach(function(cert, index){ %>
+                <% if (cert != "") { %>
+                <tr class="cert">
+                  <td class="name"><a href="/revoked/<%= cert %>.zip"><%= cert %></a></td>
+                  <td class="crt"><a href="/revoked/<%= cert %>.crt">crt</a></td>
+                  <td class="key"><a href="/revoked/<%= cert %>.key">key</a></td>
+                  <td class="pub"><a href="/revoked/<%= cert %>.pub">pub</a></td>
+                  <td class="p12"><a href="/revoked/<%= cert %>.p12">p12</a></td>
+                  <td class="pem"><a href="/revoked/<%= cert %>.pem">pem</a></td>
+                  <td class="zip"><a href="/revoked/<%= cert %>.zip">zip</a></td>
+                </tr>
+                <% } %>
+              <% }) %>
+          <% } %>
+        </table>
+
+        <form action="/" method="post" class="revoke">
+          <div class="form-group">
+            <div class="col-xs-8">
+              <select class="form-control">
+                <option value="">Select One</option>
+                <% certs.forEach(function(cert, index){ %>
+                  <% if (cert != "") { %>
+                    <option><%= cert %></option>
+                  <% } %>
+                <% }) %>
+              </select>
+            </div>
+            <div class="col-xs-4">
+              <button type="button" class="btn btn-danger">Revoke</button>
+            </div>
+            <div class="clear"></div>
+          </div>
+        </form>
+      <% } %>
+
+      <div class="footer">
+        <hr><a href="mailto:<%= ca_email %>"><%= ca_email %></a>
+      </div>
+
+      <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+      <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+      <!-- Include all compiled plugins (below), or include individual files as needed -->
+      <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+
+      <script>
+        $('tr.new.cert').each(function(){
+          $tr = $(this);
+
+          $tr.find('td.name input').on('blur', function(e){
+            name = $(this).val();
+            if (name != "") {
+              $tr.addClass('ready');
+              $tr.find('td.name a').text(name);
+              $tr.find('td.crt a').attr('href', '/' + name + '.crt');
+              $tr.find('td.key a').attr('href', '/' + name + '.key');
+              $tr.find('td.pub a').attr('href', '/' + name + '.pub');
+              $tr.find('td.p12 a').attr('href', '/' + name + '.p12');
+              $tr.find('td.pem a').attr('href', '/' + name + '.pem');
+              $tr.find('td.zip a').attr('href', '/' + name + '.zip');
+            } else {
+              $tr.removeClass('ready');
+              $tr.find('td a').attr('href', '');
+            }
+          });
+
+          $tr.find('td.name input').keyup(function(e){
+            if(e.keyCode == 13) {
+              name = $(this).val();
+              if (name != "") {
+                window.location.href = '/' + name + '.zip'
+              } else {
+                $tr.find('td a').attr('href', '');
+              }
+            }
+          });
+
+          $tr.find('td.name a').on('click', function(e){
+            $tr.removeClass('ready');
+          });
+
+        });
+
+
+        $('form.revoke').each(function(){
+          $form = $(this);
+          $select = $form.find('select'); 
+
+          $form.find('button').on('click', function(e) {
+            if ($select.val() != "") {
+              var action = "/" + $select.val() + '.zip';
+              $form.attr('action', action);
+              $form.submit();
+            }
+          });
+
+        });
+
+      </script>
+
+    </div>
+  </body>
+</html>

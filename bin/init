@@ -1,0 +1,95 @@
+#!/bin/bash
+source "$(cd "$(dirname $(dirname "${BASH_SOURCE[0]}"))" && pwd -P)/bin/config"
+
+# Copy configuration and deref variables
+cp $APP/openssl.cnf $VAR/openssl.cnf
+deref $VAR/openssl.cnf
+
+# Create directory structure
+mkdir -p $VAR/ca
+mkdir -p $VAR/db
+mkdir -p $VAR/certs
+mkdir -p $VAR/newcerts
+mkdir -p $VAR/revoked
+mkdir -p $VAR/crl
+mkdir -p $VAR/ocsp/requests
+mkdir -p $VAR/ocsp/responses
+
+# Flat file database
+has $VAR/db/index || touch $VAR/db/index
+has $VAR/db/serial || echo 1000 > $VAR/db/serial
+has $VAR/crl/crlnumber || echo 1000 > $VAR/crl/crlnumber
+
+# -------------------------------------------
+# CA Certificate
+# -------------------------------------------
+
+# Certificate variables
+UNIT="Certificate Authority"
+NAME="$CA_NAME"
+EMAIL="$CA_EMAIL"
+
+# Generate the certificate authority key
+has $VAR/ca/ca.key || 
+openssl genrsa -out $VAR/ca/ca.key 2048 -config $VAR/openssl.cnf
+chmod 400 $VAR/ca/ca.key
+
+# Generate the certificate authority certificate
+has $VAR/ca/ca.crt || 
+openssl req -new -x509 -nodes -days 3650 -extensions v3_ca                              \
+  -subj "/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"  \
+  -key $VAR/ca/ca.key                                                                   \
+  -out $VAR/ca/ca.crt                                                                   \
+  -config $VAR/openssl.cnf
+
+
+# -------------------------------------------
+# OCSP Responder
+# -------------------------------------------
+
+# Certificate variables
+UNIT="Certificate Authority OCSP"
+NAME="$CA_NAME OCSP"
+EMAIL="$CA_EMAIL"
+
+# Generate the OCSP key (ocsp.key)
+has $VAR/ocsp/ocsp.key || 
+openssl genrsa -out $VAR/ocsp/ocsp.key 2048 -config $VAR/openssl.cnf
+chmod 400 $VAR/ocsp/ocsp.key
+
+# Generate the OCSP certificate signing request (ocsp.csr)
+has $VAR/ocsp/ocsp.crt ||
+openssl req -new -extensions v3_OCSP                                                    \
+  -subj "/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"  \
+  -key    $VAR/ocsp/ocsp.key                                                            \
+  -out    $VAR/ocsp/ocsp.csr                                                            \
+  -config $VAR/openssl.cnf
+
+# Sign the request and create the certificate (ocsp.crt)
+has $VAR/ocsp/ocsp.crt || 
+yes | openssl ca -notext -md sha256 -days 3650 -extensions v3_OCSP \
+  -keyfile $VAR/ca/ca.key                                          \
+  -cert    $VAR/ca/ca.crt                                          \
+  -in      $VAR/ocsp/ocsp.csr                                      \
+  -out     $VAR/ocsp/ocsp.crt                                      \
+  -config  $VAR/openssl.cnf
+chmod 444  $VAR/ocsp/ocsp.crt
+rm -f      $VAR/ocsp/ocsp.csr
+
+
+# -------------------------------------------
+# Certificate Revocation List
+# -------------------------------------------
+
+# Regenerate the certificate revocation list
+openssl ca -gencrl                         \
+  -keyfile $VAR/ca/ca.key                  \
+  -cert    $VAR/ca/ca.crt                  \
+  -out     $VAR/crl/ca.crl.pem             \
+  -config  $VAR/openssl.cnf
+openssl crl                                \
+  -inform  PEM                             \
+  -outform DER                             \
+  -in      $VAR/crl/ca.crl.pem             \
+  -out     $VAR/crl/ca.crl                 \
+  -config  $VAR/openssl.cnf

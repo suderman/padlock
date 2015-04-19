@@ -1,0 +1,39 @@
+#!/bin/bash
+source "$(cd "$(dirname $(dirname "${BASH_SOURCE[0]}"))" && pwd -P)/bin/config"
+
+# -------------------------------------------
+# Revoke Certificate
+# -------------------------------------------
+NAME="$1"
+
+# Make sure certificate exists
+if grep '^V.*'`printf '%q' "/CN=$NAME/"` $VAR/db/index; then
+
+  # Revoke the certificate
+  openssl ca                                 \
+    -revoke  "$VAR/certs/$NAME/$NAME.crt"    \
+    -keyfile  $VAR/ca/ca.key                 \
+    -cert     $VAR/ca/ca.crt                 \
+    -config   $VAR/openssl.cnf
+
+  # Regenerate the certificate revocation list
+  openssl ca -gencrl                         \
+    -keyfile  $VAR/ca/ca.key                 \
+    -cert     $VAR/ca/ca.crt                 \
+    -out      $VAR/crl/ca.crl                \
+    -config   $VAR/openssl.cnf
+  openssl crl                                \
+    -inform   PEM                            \
+    -outform  DER                            \
+    -in       $VAR/crl/ca.crl.pem            \
+    -out      $VAR/crl/ca.crl                \
+    -config   $VAR/openssl.cnf
+
+  # Remove all key/cert files
+  rm -rf  "$VAR/revoked/$NAME"
+  mv "$VAR/certs/$NAME" "$VAR/revoked/$NAME"
+
+else
+  echo "Revoke issue: $NAME doesn't exist."
+fi
+

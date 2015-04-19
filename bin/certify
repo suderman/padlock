@@ -1,0 +1,69 @@
+#!/bin/bash
+source "$(cd "$(dirname $(dirname "${BASH_SOURCE[0]}"))" && pwd -P)/bin/config"
+
+# -------------------------------------------
+# New Certificate
+# -------------------------------------------
+
+# Certificate variables
+UNIT="Certificate"
+NAME="$1"
+EMAIL=$(echo $NAME | sed 's/^\*\.//')
+EMAIL=$(echo $EMAIL | sed 's/^www\.//')
+if [[ $EMAIL != *@* ]]; then EMAIL="contact@$EMAIL"; fi 
+
+# Stop here if it already exists
+if grep '^V.*'`printf '%q' "/CN=$NAME/"` $VAR/db/index; then
+  echo "Stopped: $NAME already exists and is valid."
+  exit; 
+fi
+
+# Create the cert directory and copy the CA certificate (ca.crt)
+mkdir -p "$VAR/certs/$NAME"
+rm -f "$VAR/certs/$NAME/ca.crt"
+cp $VAR/ca/ca.crt "$VAR/certs/$NAME/ca.crt"
+
+# Generate the private/public key pair ($NAME.key)
+openssl genrsa -out "$VAR/certs/$NAME/$NAME.key" 2048 -config $VAR/openssl.cnf
+chmod 600 "$VAR/certs/$NAME/$NAME.key"
+
+# Extract the public key into its own file ($NAME.pub)
+openssl rsa -pubout                                  \
+  -in "$VAR/certs/$NAME/$NAME.key"                   \
+  -out "$VAR/certs/$NAME/$NAME.pub"                  \
+  -config $VAR/openssl.cnf
+
+# Create the request ($NAME.csr)
+openssl req -new                                                                        \
+  -subj "/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"  \
+  -key "$VAR/certs/$NAME/$NAME.key"                                                     \
+  -out "$VAR/certs/$NAME/$NAME.csr"                                                     \
+  -config $VAR/openssl.cnf
+
+
+# Sign the request and create the certificate ($NAME.crt)
+yes | openssl ca -notext -md sha256 -days 3650 -extensions usr_cert      \
+  -keyfile $VAR/ca/ca.key                                                \
+  -cert    $VAR/ca/ca.crt                                                \
+  -in      "$VAR/certs/$NAME/$NAME.csr"                                  \
+  -out     "$VAR/certs/$NAME/$NAME.crt"                                  \
+  -config  $VAR/openssl.cnf
+chmod 444 "$VAR/certs/$NAME/$NAME.crt"
+rm -f "$VAR/$NAME/$NAME.csr"
+
+# Generate a p12 file from everything we just made ($NAME.p12)
+openssl pkcs12 -export -password pass:$NAME                             \
+  -certfile $VAR/ca/ca.crt                                              \
+  -inkey   "$VAR/certs/$NAME/$NAME.key"                                 \
+  -in      "$VAR/certs/$NAME/$NAME.crt"                                 \
+  -out     "$VAR/certs/$NAME/$NAME.p12"                                 \
+  -config   $VAR/openssl.cnf
+
+# Generate a pem file with the crt & key combined ($NAME.pem)
+cat "$VAR/certs/$NAME/$NAME.crt" "$VAR/certs/$NAME/$NAME.key"           \
+  > "$VAR/certs/$NAME/$NAME.pem"
+
+# Create a zip archive of everything ($NAME.zip)
+rm -f  "$VAR/certs/$NAME/$NAME.zip"
+zip -j "$VAR/certs/$NAME/$NAME.zip" "$VAR/certs/$NAME/"*
+

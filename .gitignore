@@ -1,0 +1,7 @@
+logs
+*.log
+.env
+padlock.cnf
+data/*
+node_modules/*
+!node_modules/lib
