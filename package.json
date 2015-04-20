@@ -2,15 +2,16 @@
   "name": "padlock",
   "version": "0.0.1",
   "private": true,
-  "main": "server.js",
   "description": "Certificate Authority",
   "dependencies": {
+    "babel": "^5.1.10",
     "dotenv": "^1.1.0",
     "ejs": "^1.0.0",
     "express": "~3.3.3",
     "shelljs": "^0.3.0"
   },
   "scripts": {
-    "start": "node server.js"
+    "server": "node ./app/index",
+    "start": "NODE_ENV=production npm run server"
   }
 }

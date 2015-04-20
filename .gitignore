@@ -2,6 +2,6 @@ logs
 *.log
 .env
 padlock.cnf
-data/*
+var/*
 node_modules/*
 !node_modules/lib
