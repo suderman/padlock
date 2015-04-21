@@ -7,33 +7,31 @@ source "$(cd "$(dirname $(dirname "${BASH_SOURCE[0]}"))" && pwd -P)/bin/config"
 NAME="$1"
 
 # Make sure certificate exists
-if grep '^V.*'`printf '%q' "/CN=$NAME/"` $VAR/db/index; then
+if grep '^V.*'`printf '%q' "/CN=$NAME/"` $CERTIFICATES/db/index; then
 
   # Revoke the certificate
-  openssl ca                                 \
-    -revoke  "$VAR/certs/$NAME/$NAME.crt"    \
-    -keyfile  $VAR/ca/ca.key                 \
-    -cert     $VAR/ca/ca.crt                 \
-    -config   $VAR/openssl.cnf
+  openssl ca                                       \
+    -revoke  "$CERTIFICATES/certs/$NAME/$NAME.crt" \
+    -keyfile  $CERTIFICATES/ca/ca.key              \
+    -cert     $CERTIFICATES/ca/ca.crt              \
+    -config   $CERTIFICATES/openssl.cnf
 
   # Regenerate the certificate revocation list
   openssl ca -gencrl                         \
-    -keyfile  $VAR/ca/ca.key                 \
-    -cert     $VAR/ca/ca.crt                 \
-    -out      $VAR/crl/ca.crl                \
-    -config   $VAR/openssl.cnf
+    -keyfile  $CERTIFICATES/ca/ca.key        \
+    -cert     $CERTIFICATES/ca/ca.crt        \
+    -out      $CERTIFICATES/crl/ca.crl       \
+    -config   $CERTIFICATES/openssl.cnf
   openssl crl                                \
     -inform   PEM                            \
     -outform  DER                            \
-    -in       $VAR/crl/ca.crl.pem            \
-    -out      $VAR/crl/ca.crl                \
-    -config   $VAR/openssl.cnf
+    -in       $CERTIFICATES/crl/ca.crl.pem   \
+    -out      $CERTIFICATES/crl/ca.crl
 
   # Remove all key/cert files
-  rm -rf  "$VAR/revoked/$NAME"
-  mv "$VAR/certs/$NAME" "$VAR/revoked/$NAME"
+  rm -rf  "$CERTIFICATES/revoked/$NAME"
+  mv "$CERTIFICATES/certs/$NAME" "$CERTIFICATES/revoked/$NAME"
 
 else
   echo "Revoke issue: $NAME doesn't exist."
 fi
-

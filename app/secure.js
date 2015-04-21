@@ -9,7 +9,7 @@
 
 var path = require('path'),
     fs = require('fs');
-var dir = fs.realpathSync(path.join(__dirname, '../var')),
+var dir = fs.realpathSync(path.join(__dirname, '../certificates')),
     bin = fs.realpathSync(path.join(__dirname, '../bin'));
 
 var express = require('express');

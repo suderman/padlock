@@ -3,7 +3,8 @@ eval "$(cat ~/.local/share/shelper.sh || curl suderman.github.io/shelper/shelper
 
 # App and Var directory
 export ROOT=$(cd "$(dirname $(dirname "${BASH_SOURCE[0]}"))" && pwd -P)
-export VAR=$(cd "$ROOT/var" && pwd -P)
+mkdir -p "$ROOT/certificates"
+export CERTIFICATES=$(cd "$ROOT/certificates" && pwd -P)
 
 # Populate environment variables
 source $ROOT/.env || source $ROOT/.env-sample
