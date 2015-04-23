@@ -4,7 +4,7 @@ Certificate Authority with CRL & OCSP Responder
 
 ## Installation
 
-`git clone https://github.com/suderman/padlock.git` 
+`git clone https://github.com/suderman/padlock.git`  
 `cd padlock`  
 `npm install`  
 `npm start`  
