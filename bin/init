@@ -13,23 +13,24 @@ if hasnt zip; then
 fi
 
 # Copy configuration and deref variables
-copy "$ROOT/openssl.cnf" "$CERTIFICATES/openssl.cnf"
-deref "$CERTIFICATES/openssl.cnf"
+copy "$ROOT/openssl.cnf" "$CA/openssl.cnf"
+deref "$CA/openssl.cnf"
 
 # Create directory structure
-mkdir -p $CERTIFICATES/ca
-mkdir -p $CERTIFICATES/db
-mkdir -p $CERTIFICATES/certs
-mkdir -p $CERTIFICATES/newcerts
-mkdir -p $CERTIFICATES/revoked
-mkdir -p $CERTIFICATES/crl
-mkdir -p $CERTIFICATES/ocsp/requests
-mkdir -p $CERTIFICATES/ocsp/responses
+mkdir -p $CA/root
+mkdir -p $CA/db
+mkdir -p $CA/certs
+mkdir -p $CA/newcerts
+mkdir -p $CA/revoked
+mkdir -p $CA/crl
+mkdir -p $CA/ocsp/requests
+mkdir -p $CA/ocsp/responses
+mkdir -p $CA/ocsp/text
 
 # Flat file database
-has $CERTIFICATES/db/index || touch $CERTIFICATES/db/index
-has $CERTIFICATES/db/serial || echo 1000 > $CERTIFICATES/db/serial
-has $CERTIFICATES/crl/crlnumber || echo 1000 > $CERTIFICATES/crl/crlnumber
+has $CA/db/index || touch $CA/db/index
+has $CA/db/serial || echo 1000 > $CA/db/serial
+has $CA/crl/crlnumber || echo 1000 > $CA/crl/crlnumber
 
 # -------------------------------------------
 # CA Certificate
@@ -41,19 +42,21 @@ NAME="$CA_NAME"
 EMAIL="$CA_EMAIL"
 
 # Generate the certificate authority key
-echo "Generate the certificate authority key"
-has $CERTIFICATES/ca/ca.key || 
-openssl genrsa -out $CERTIFICATES/ca/ca.key 2048 -config $CERTIFICATES/openssl.cnf
-chmod 400 $CERTIFICATES/ca/ca.key
+if hasnt $CA/root/ca.key; then
+  echo "Generate the certificate authority key"
+  openssl genrsa -out $CA/root/ca.key 2048 -config $CA/openssl.cnf
+  chmod 400 $CA/root/ca.key
+fi
 
 # Generate the certificate authority certificate
-echo "Generate the certificate authority certificate"
-has $CERTIFICATES/ca/ca.crt || 
-openssl req -new -x509 -nodes -days 3650 -extensions v3_ca                              \
-  -subj "/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"  \
-  -key $CERTIFICATES/ca/ca.key                                                          \
-  -out $CERTIFICATES/ca/ca.crt                                                          \
-  -config $CERTIFICATES/openssl.cnf
+if hasnt $CA/root/ca.crt; then
+  echo "Generate the certificate authority certificate"
+  openssl req -new -x509 -nodes -days 3650 -extensions v3_ca                              \
+    -subj "/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"  \
+    -key $CA/root/ca.key                                                                  \
+    -out $CA/root/ca.crt                                                                  \
+    -config $CA/openssl.cnf
+fi
 
 
 # -------------------------------------------
@@ -66,31 +69,34 @@ NAME="$CA_NAME OCSP"
 EMAIL="$CA_EMAIL"
 
 # Generate the OCSP key (ocsp.key)
-echo "Generate the OCSP key (ocsp.key)"
-has $CERTIFICATES/ocsp/ocsp.key || 
-openssl genrsa -out $CERTIFICATES/ocsp/ocsp.key 2048 -config $CERTIFICATES/openssl.cnf
-chmod 400 $CERTIFICATES/ocsp/ocsp.key
+if hasnt $CA/ocsp/ocsp.key; then  
+  echo "Generate the OCSP key (ocsp.key)"
+  openssl genrsa -out $CA/ocsp/ocsp.key 2048 -config $CA/openssl.cnf
+  chmod 400 $CA/ocsp/ocsp.key
+fi
 
 # Generate the OCSP certificate signing request (ocsp.csr)
-echo "Generate the OCSP certificate signing request (ocsp.csr)"
-has $CERTIFICATES/ocsp/ocsp.crt ||
-openssl req -new -extensions v3_OCSP                                                    \
-  -subj "/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"  \
-  -key    $CERTIFICATES/ocsp/ocsp.key                                                   \
-  -out    $CERTIFICATES/ocsp/ocsp.csr                                                   \
-  -config $CERTIFICATES/openssl.cnf
+if hasnt $CA/ocsp/ocsp.crt; then
+  echo "Generate the OCSP certificate signing request (ocsp.csr)"
+  openssl req -new -extensions v3_OCSP                                                    \
+    -subj "/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"  \
+    -key    $CA/ocsp/ocsp.key                                                             \
+    -out    $CA/ocsp/ocsp.csr                                                             \
+    -config $CA/openssl.cnf
+fi
 
 # Sign the request and create the certificate (ocsp.crt)
-echo "Sign the request and create the certificate (ocsp.crt)"
-has $CERTIFICATES/ocsp/ocsp.crt || 
-yes | openssl ca -notext -md sha256 -days 3650 -extensions v3_OCSP \
-  -keyfile $CERTIFICATES/ca/ca.key                                 \
-  -cert    $CERTIFICATES/ca/ca.crt                                 \
-  -in      $CERTIFICATES/ocsp/ocsp.csr                             \
-  -out     $CERTIFICATES/ocsp/ocsp.crt                             \
-  -config  $CERTIFICATES/openssl.cnf
-chmod 444  $CERTIFICATES/ocsp/ocsp.crt
-rm -f      $CERTIFICATES/ocsp/ocsp.csr
+if hasnt $CA/ocsp/ocsp.crt; then
+  echo "Sign the request and create the certificate (ocsp.crt)"
+  yes | openssl ca -notext -md sha256 -days 3650 -extensions v3_OCSP \
+    -keyfile $CA/root/ca.key                                         \
+    -cert    $CA/root/ca.crt                                         \
+    -in      $CA/ocsp/ocsp.csr                                       \
+    -out     $CA/ocsp/ocsp.crt                                       \
+    -config  $CA/openssl.cnf
+  chmod 444  $CA/ocsp/ocsp.crt
+  rm -f      $CA/ocsp/ocsp.csr
+fi
 
 
 # -------------------------------------------
@@ -100,12 +106,12 @@ rm -f      $CERTIFICATES/ocsp/ocsp.csr
 # Regenerate the certificate revocation list
 echo "Regenerate the certificate revocation list"
 openssl ca -gencrl                         \
-  -keyfile $CERTIFICATES/ca/ca.key         \
-  -cert    $CERTIFICATES/ca/ca.crt         \
-  -out     $CERTIFICATES/crl/ca.crl.pem    \
-  -config  $CERTIFICATES/openssl.cnf
+  -keyfile $CA/root/ca.key                 \
+  -cert    $CA/root/ca.crt                 \
+  -out     $CA/crl/ca.crl.pem              \
+  -config  $CA/openssl.cnf
 openssl crl                                \
   -inform  PEM                             \
   -outform DER                             \
-  -in      $CERTIFICATES/crl/ca.crl.pem    \
-  -out     $CERTIFICATES/crl/ca.crl
+  -in      $CA/crl/ca.crl.pem              \
+  -out     $CA/crl/ca.crl

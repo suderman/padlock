@@ -7,7 +7,7 @@
 
 var path = require('path'),
     fs = require('fs');
-var dir = fs.realpathSync(path.join(__dirname, '../certificates')),
+var ca  = fs.realpathSync(path.join(__dirname, '../ca')),
     bin = fs.realpathSync(path.join(__dirname, '../bin'));
 
 var express = require('express');
@@ -26,28 +26,28 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // Send the root certificate
 app.get('/ca.crt', function(req, res) {
-  res.sendfile(`${dir}/ca/ca.crt`);
+  res.sendfile(`${ca}/root/ca.crt`);
 });
 
 // Send the certificate revocation list
 app.get('/ca.crl', function(req, res) {
-  res.sendfile(`${dir}/crl/ca.crl`);
+  res.sendfile(`${ca}/crl/ca.crl`);
 });
 
 // Send the certificate revocation list (pem)
 app.get('/ca.crl.pem', function(req, res) {
-  res.sendfile(`${dir}/crl/ca.crl.pem`);
+  res.sendfile(`${ca}/crl/ca.crl.pem`);
 });
 
 // Show index page
 app.get(/\/*/, function(req, res) {
-
-  var { DOMAIN, CA_NAME, CA_EMAIL } = process.env;
   res.render('index.ejs', { 
     private:  false, 
-    ca_name:  CA_NAME, 
-    ca_email: CA_EMAIL, 
-    domain:   DOMAIN,
+    domain:    process.env.DOMAIN,
+    ca_name:   process.env.CA_NAME, 
+    ca_email:  process.env.CA_EMAIL, 
+    crl_host:  process.env.CRL_HOST, 
+    ocsp_host: process.env.OCSP_HOST, 
     certs:    [], 
     revoked:  []
   });
@@ -55,4 +55,4 @@ app.get(/\/*/, function(req, res) {
 
 // Public port
 app.listen(process.env.PUBLIC_PORT);
-console.log('Listening on port ' + process.env.PUBLIC_PORT);
+console.log('Public listening on port ' + process.env.PUBLIC_PORT);

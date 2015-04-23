@@ -13,61 +13,61 @@ EMAIL=$(echo $EMAIL | sed 's/^www\.//')
 if [[ $EMAIL != *@* ]]; then EMAIL="contact@$EMAIL"; fi 
 
 # Stop here if it already exists
-if grep '^V.*'`printf '%q' "/CN=$NAME/"` $CERTIFICATES/db/index; then
+if grep '^V.*'`printf '%q' "/CN=$NAME/"` $CA/db/index; then
   echo "Stopped: $NAME already exists and is valid."
   exit; 
 fi
 
 # Create the cert directory and copy the CA certificate (ca.crt)
 echo "Create the cert directory and copy the CA certificate (ca.crt)"
-copy $CERTIFICATES/ca/ca.crt "$CERTIFICATES/certs/$NAME/ca.crt"
+copy $CA/root/ca.crt "$CA/certs/$NAME/ca.crt"
 
 # Generate the private/public key pair ($NAME.key)
 echo "Generate the private/public key pair ($NAME.key)"
-openssl genrsa -out "$CERTIFICATES/certs/$NAME/$NAME.key" 2048 -config $CERTIFICATES/openssl.cnf
-chmod 600 "$CERTIFICATES/certs/$NAME/$NAME.key"
+openssl genrsa -out "$CA/certs/$NAME/$NAME.key" 2048 -config $CA/openssl.cnf
+chmod 600 "$CA/certs/$NAME/$NAME.key"
 
 # Extract the public key into its own file ($NAME.pub)
 echo "Extract the public key into its own file ($NAME.pub)"
 openssl rsa -pubout                                  \
-  -in "$CERTIFICATES/certs/$NAME/$NAME.key"          \
-  -out "$CERTIFICATES/certs/$NAME/$NAME.pub"         \
-  -config $CERTIFICATES/openssl.cnf
+  -in "$CA/certs/$NAME/$NAME.key"                    \
+  -out "$CA/certs/$NAME/$NAME.pub"                   \
+  -config $CA/openssl.cnf
 
 # Create the request ($NAME.csr)
 echo "Create the request ($NAME.csr)"
 openssl req -new                                                                        \
   -subj "/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"  \
-  -key "$CERTIFICATES/certs/$NAME/$NAME.key"                                            \
-  -out "$CERTIFICATES/certs/$NAME/$NAME.csr"                                            \
-  -config $CERTIFICATES/openssl.cnf
+  -key "$CA/certs/$NAME/$NAME.key"                                                      \
+  -out "$CA/certs/$NAME/$NAME.csr"                                                      \
+  -config $CA/openssl.cnf
 
 
 # Sign the request and create the certificate ($NAME.crt)
 echo "Sign the request and create the certificate ($NAME.crt)"
-yes | openssl ca -notext -md sha256 -days 3650 -extensions usr_cert      \
-  -keyfile $CERTIFICATES/ca/ca.key                                       \
-  -cert    $CERTIFICATES/ca/ca.crt                                       \
-  -in      "$CERTIFICATES/certs/$NAME/$NAME.csr"                         \
-  -out     "$CERTIFICATES/certs/$NAME/$NAME.crt"                         \
-  -config  $CERTIFICATES/openssl.cnf
-chmod 444 "$CERTIFICATES/certs/$NAME/$NAME.crt"
-rm -f "$CERTIFICATES/$NAME/$NAME.csr"
+yes | openssl ca -notext -md sha256 -days 3650 -extensions usr_cert  \
+  -keyfile $CA/root/ca.key                                           \
+  -cert    $CA/root/ca.crt                                           \
+  -in      "$CA/certs/$NAME/$NAME.csr"                               \
+  -out     "$CA/certs/$NAME/$NAME.crt"                               \
+  -config  $CA/openssl.cnf
+chmod 444 "$CA/certs/$NAME/$NAME.crt"
+rm -f "$CA/$NAME/$NAME.csr"
 
 # Generate a p12 file from everything we just made ($NAME.p12)
 echo "Generate a p12 file from everything we just made ($NAME.p12)"
-openssl pkcs12 -export -password pass:$NAME                             \
-  -certfile $CERTIFICATES/ca/ca.crt                                     \
-  -inkey   "$CERTIFICATES/certs/$NAME/$NAME.key"                        \
-  -in      "$CERTIFICATES/certs/$NAME/$NAME.crt"                        \
-  -out     "$CERTIFICATES/certs/$NAME/$NAME.p12"
+openssl pkcs12 -export -password pass:$NAME                   \
+  -certfile $CA/root/ca.crt                                   \
+  -inkey   "$CA/certs/$NAME/$NAME.key"                        \
+  -in      "$CA/certs/$NAME/$NAME.crt"                        \
+  -out     "$CA/certs/$NAME/$NAME.p12"
 
 # Generate a pem file with the crt & key combined ($NAME.pem)
 echo "Generate a pem file with the crt & key combined ($NAME.pem)"
-cat "$CERTIFICATES/certs/$NAME/$NAME.crt" "$CERTIFICATES/certs/$NAME/$NAME.key" \
-  > "$CERTIFICATES/certs/$NAME/$NAME.pem"
+cat "$CA/certs/$NAME/$NAME.crt" "$CA/certs/$NAME/$NAME.key" \
+  > "$CA/certs/$NAME/$NAME.pem"
 
 # Create a zip archive of everything ($NAME.zip)
 echo "Create a zip archive of everything ($NAME.zip)"
-rm -f  "$CERTIFICATES/certs/$NAME/$NAME.zip"
-zip -j "$CERTIFICATES/certs/$NAME/$NAME.zip" "$CERTIFICATES/certs/$NAME/"*
+rm -f  "$CA/certs/$NAME/$NAME.zip"
+zip -j "$CA/certs/$NAME/$NAME.zip" "$CA/certs/$NAME/"*

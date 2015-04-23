@@ -1,7 +1,6 @@
 logs
 *.log
 .env
-padlock.cnf
-certificates/*
+ca/*
 node_modules/*
 !node_modules/lib

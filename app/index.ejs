@@ -47,9 +47,9 @@
 
       <div class="main">
         <h1><%= ca_name %></h1>
-        <a class="btn btn-primary btn-lg" href="/ca.crt">Root Certificate</a>
-        <a class="btn btn-default btn-lg" href="/ca.crl">CRL</a>
-        <a class="btn btn-default btn-lg" href="http://ocsp.ca.<%=domain%>/">OCSP</a>
+        <a class="btn btn-primary btn-lg" href="http://<%=crl_host%>/ca.crt">Root Certificate</a>
+        <a class="btn btn-default btn-lg" href="http://<%=crl_host%>/ca.crl">CRL</a>
+        <a class="btn btn-default btn-lg" href="http://<%=ocsp_host%>/">OCSP</a>
       </div>
 
       <% if (private) { %>

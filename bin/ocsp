@@ -12,37 +12,37 @@ if undefined $FILENAME || undefined $MINUTES_VALID; then
 fi
 
 # Ensure request exists on disk
-if hasnt "$CERTIFICATES/ocsp/requests/$FILENAME"; then
-  echo "OCSP request missing: $CERTIFICATES/ocsp/requests/$FILENAME"
+if hasnt "$CA/ocsp/requests/$FILENAME"; then
+  echo "OCSP request missing: $CA/ocsp/requests/$FILENAME"
   exit 1;
 fi
 
 # Turn request into response
-openssl ocsp                                        \
-  -index $CERTIFICATES/db/index                     \
-  -CA $CERTIFICATES/ca/ca.crt                       \
-  -CAfile $CERTIFICATES/ca/ca.crt                   \
-  -issuer $CERTIFICATES/ca/ca.crt                   \
-  -rsigner $CERTIFICATES/ocsp/ocsp.crt              \
-  -rkey $CERTIFICATES/ocsp/ocsp.key                 \
-  -nmin $MINUTES_VALID                              \
-  -reqin "$CERTIFICATES/ocsp/requests/$FILENAME"    \
-  -respout "$CERTIFICATES/ocsp/responses/$FILENAME"
+openssl ocsp                              \
+  -index $CA/db/index                     \
+  -CA $CA/root/ca.crt                     \
+  -CAfile $CA/root/ca.crt                 \
+  -issuer $CA/root/ca.crt                 \
+  -rsigner $CA/ocsp/ocsp.crt              \
+  -rkey $CA/ocsp/ocsp.key                 \
+  -nmin $MINUTES_VALID                    \
+  -reqin "$CA/ocsp/requests/$FILENAME"    \
+  -respout "$CA/ocsp/responses/$FILENAME" \
+  -text -out "$CA/ocsp/text/$FILENAME"
 
 # If the response doesn't exist, it failed. 
 # Delete request and exit
-if hasnt "$CERTIFICATES/ocsp/responses/$FILENAME"; then
-  /bin/rm -f "$CERTIFICATES/ocsp/requests/$FILENAME"
+if hasnt "$CA/ocsp/responses/$FILENAME"; then
+  /bin/rm -f "$CA/ocsp/requests/$FILENAME"
   exit 1
 fi
 
 # Response successful!
 
-# uncacheable=$(openssl ocsp -req_text -reqin "$REQ" | grep "OCSP Nonce");
 # Check if the request has a nonce (can't be cached)
-if [ "$(openssl ocsp -req_text -reqin "$CERTIFICATES/ocsp/requests/$FILENAME" | grep "OCSP Nonce")" ]; then
+if [ "$(openssl ocsp -req_text -reqin "$CA/ocsp/requests/$FILENAME" | grep "OCSP Nonce")" ]; then
 
-  /bin/rm -f "$CERTIFICATES/ocsp/requests/$FILENAME"
+  /bin/rm -f "$CA/ocsp/requests/$FILENAME"
   exit 0
 
 # The request and response IS cacheable
@@ -51,8 +51,8 @@ else
 
   # Copy request & response to cache
   if [ "$FILENAME" != "$CACHED" ]; then
-    /bin/mv -f "$CERTIFICATES/ocsp/requests/$FILENAME" "$CERTIFICATES/ocsp/requests/$CACHED"
-    /bin/cp -f "$CERTIFICATES/ocsp/responses/$FILENAME" "$CERTIFICATES/ocsp/responses/$CACHED"
+    /bin/mv -f "$CA/ocsp/requests/$FILENAME" "$CA/ocsp/requests/$CACHED"
+    /bin/cp -f "$CA/ocsp/responses/$FILENAME" "$CA/ocsp/responses/$CACHED"
   fi
 
   exit 0

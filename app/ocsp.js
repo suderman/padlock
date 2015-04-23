@@ -10,7 +10,7 @@ var path = require('path'),
     fs = require('fs'),
     crypto = require('crypto');
 
-var dir = fs.realpathSync(path.join(__dirname, '../certificates')),
+var ca  = fs.realpathSync(path.join(__dirname, '../ca')),
     bin = fs.realpathSync(path.join(__dirname, '../bin')),
     pub = fs.realpathSync(path.join(__dirname, '../public'));
 
@@ -44,11 +44,11 @@ var ocsp = {
   },
 
   requestPath: function(filename) {
-    return `${dir}/ocsp/requests/${filename}`;
+    return `${ca}/ocsp/requests/${filename}`;
   },
 
   responsePath: function(filename) {
-    return `${dir}/ocsp/responses/${filename}`;
+    return `${ca}/ocsp/responses/${filename}`;
   },
 
   minutesValid: 5
@@ -59,7 +59,7 @@ var ocsp = {
 ocsp.refresh = function() {
 
   // Loop through all cached requests
-  exec(`ls ${dir}/ocsp/requests/`, { silent: true }).output.split("\n").forEach(function(filename) {
+  exec(`ls ${ca}/ocsp/requests/`, { silent: true }).output.split("\n").forEach(function(filename) {
 
     var cached = ocsp.filename(filename, true);
 
@@ -108,12 +108,14 @@ ocsp.verify = function(b64, res) {
 
 // Verify request on POST
 app.post('/', function(req, res) {
+  console.log('OCSP POST')
   var b64 = new Buffer(req.rawBody).toString('base64');
   ocsp.serve(b64, res);
 });
 
 // Verify request on GET
 app.get('/*', function(req, res) {
+  console.log('OCSP GET')
   var b64 = unescape(req.params[0]);
   if (b64.charAt(0) == "/") b64 = b64.substr(1); // Just in case there's a leading slash
   ocsp.serve(b64, res);
@@ -127,6 +129,7 @@ ocsp.serve = function(b64, res) {
 
   // Send the response
   if (test('-f', responsePath)) {
+    console.log('Cached response');
 
     // Set the headers
     res.setHeader('Content-type', 'application/ocsp-response');
@@ -137,20 +140,21 @@ ocsp.serve = function(b64, res) {
 
   // If it's not in the cache, verify the request right now!
   } else {
+    console.log('Fresh response');
     ocsp.verify(b64, res);
   }
 }
 
 // OCSP port
 app.listen(process.env.OCSP_PORT);
-console.log('Listening on port ' + process.env.OCSP_PORT);
+console.log('OCSP listening on port ' + process.env.OCSP_PORT);
 
 // Refresh OCSP responses (preload cache) before they expire
 setInterval(function() {
-  console.log("Refreshing responses every " + (ocsp.minutesValid - 0.5) + " minutes");
+  console.log("OCSP refreshing responses every " + (ocsp.minutesValid - 0.5) + " minutes");
   ocsp.refresh();
 }, (ocsp.minutesValid - 0.5) * 60 * 1000);
 
 // Clean cache
-exec(`rm -rf "${ocsp.responsePath('*')}"`);
-exec(`rm -rf "${ocsp.requestPath('*')}"`);
+exec(`rm -rf ${ocsp.responsePath('*')}`);
+exec(`rm -rf ${ocsp.requestPath('*')}`);

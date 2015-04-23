@@ -9,7 +9,7 @@
 
 var path = require('path'),
     fs = require('fs');
-var dir = fs.realpathSync(path.join(__dirname, '../certificates')),
+var ca  = fs.realpathSync(path.join(__dirname, '../ca')),
     bin = fs.realpathSync(path.join(__dirname, '../bin'));
 
 var express = require('express');
@@ -25,22 +25,22 @@ app.use(express.static(path.join(__dirname, '../public')));
 
 // Send the root certificate
 app.get('/ca.crt', function(req, res) {
-  res.sendfile(`${dir}/ca/ca.crt`);
+  res.sendfile(`${ca}/root/ca.crt`);
 });
 
 // Send the certificate revocation list
 app.get('/ca.crl', function(req, res) {
-  res.sendfile(`${dir}/crl/ca.crl`);
+  res.sendfile(`${ca}/crl/ca.crl`);
 });
 
 // Send the certificate revocation list (pem)
 app.get('/ca.crl.pem', function(req, res) {
-  res.sendfile(`${dir}/crl/ca.crl.pem`);
+  res.sendfile(`${ca}/crl/ca.crl.pem`);
 });
 
 // Send revoked certificates on GET
 app.get('/revoked/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, res) {
-  var path = `${dir}/revoked/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
+  var path = `${ca}/revoked/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Send the requested file
   if (test('-f', path)) {
@@ -50,7 +50,7 @@ app.get('/revoked/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, 
 
 // Sign/present certificates on GET
 app.get('/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, res) {
-  var path = `${dir}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
+  var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Build the requested file if it doesn't exist
   if (!test('-f', path)) {
@@ -63,7 +63,7 @@ app.get('/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, res) {
 
 // Revoke certicates on POST
 app.post('/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, res) {
-  var path = `${dir}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
+  var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Revoke the certificate if it exists
   if (test('-f', path)) {
@@ -76,18 +76,18 @@ app.post('/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, res) {
 
 // Show index page
 app.get(/\/*/, function(req, res) {
-
-  var { DOMAIN, CA_NAME, CA_EMAIL } = process.env;
   res.render('index.ejs', { 
-    private:  true, 
-    ca_name:  CA_NAME, 
-    ca_email: CA_EMAIL, 
-    domain:   DOMAIN,
-    certs:    exec(`ls ${dir}/certs`, { silent: true }).output.split("\n"), 
-    revoked:  exec(`ls ${dir}/revoked`, { silent: true }).output.split("\n")
+    private:   true, 
+    domain:    process.env.DOMAIN,
+    ca_name:   process.env.CA_NAME, 
+    ca_email:  process.env.CA_EMAIL, 
+    crl_host:  process.env.CRL_HOST, 
+    ocsp_host: process.env.OCSP_HOST, 
+    certs:     exec(`ls ${ca}/certs`, { silent: true }).output.split("\n"), 
+    revoked:   exec(`ls ${ca}/revoked`, { silent: true }).output.split("\n")
   });
 });
 
 // Secure port
 app.listen(process.env.SECURE_PORT);
-console.log('Listening on port ' + process.env.SECURE_PORT);
+console.log('Secure listening on port ' + process.env.SECURE_PORT);
