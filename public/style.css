@@ -1,0 +1,31 @@
+#site { padding: 0px 5px 20px; }
+h1 { font-size: 33px; padding: 10px; background: lightgray; text-align: center; }
+.main { text-align: center; }
+.main a { font-size: 16px; }
+
+.form-control { padding: 6px 10px; }
+
+tr.new a { color: gray; line-height: 2em; }
+tr.new a:hover { text-decoration: none; }
+
+tr.new td.name a { display: none; }
+tr.new td.name input { display: block; }
+
+tr.new.ready td.name a { display: block; }
+
+tr.new td.name a { display: none; }
+tr.new.ready td.name input { display: none; }
+
+tr.new.ready a { color: #428bca; }
+tr.new.ready a:hover { text-decoration: underline; }
+
+form.revoke .form-group > div { padding-left: 7px; }
+
+@media only screen and (max-width : 320px) {
+  tr.cert td.pub { display: none; }
+  tr.cert td.pem { display: none; }
+  tr.cert td.zip { display: none; }
+}
+.clear { clear: both; height: 0; }
+.footer { text-align: center; }
+

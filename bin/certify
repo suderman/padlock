@@ -25,14 +25,13 @@ copy $CA/root/ca.crt "$CA/certs/$NAME/ca.crt"
 # Generate the private/public key pair ($NAME.key)
 echo "Generate the private/public key pair ($NAME.key)"
 openssl genrsa -out "$CA/certs/$NAME/$NAME.key" 2048 -config $CA/openssl.cnf
-chmod 600 "$CA/certs/$NAME/$NAME.key"
+chmod 444 "$CA/certs/$NAME/$NAME.key"
 
 # Extract the public key into its own file ($NAME.pub)
 echo "Extract the public key into its own file ($NAME.pub)"
 openssl rsa -pubout                                  \
   -in "$CA/certs/$NAME/$NAME.key"                    \
-  -out "$CA/certs/$NAME/$NAME.pub"                   \
-  -config $CA/openssl.cnf
+  -out "$CA/certs/$NAME/$NAME.pub"
 
 # Create the request ($NAME.csr)
 echo "Create the request ($NAME.csr)"
@@ -51,8 +50,8 @@ yes | openssl ca -notext -md sha256 -days 3650 -extensions usr_cert  \
   -in      "$CA/certs/$NAME/$NAME.csr"                               \
   -out     "$CA/certs/$NAME/$NAME.crt"                               \
   -config  $CA/openssl.cnf
-chmod 444 "$CA/certs/$NAME/$NAME.crt"
-rm -f "$CA/$NAME/$NAME.csr"
+chmod 600 "$CA/certs/$NAME/$NAME.crt"
+rm -f "$CA/certs/$NAME/$NAME.csr"
 
 # Generate a p12 file from everything we just made ($NAME.p12)
 echo "Generate a p12 file from everything we just made ($NAME.p12)"

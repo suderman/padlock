@@ -38,8 +38,8 @@ has $CA/crl/crlnumber || echo 1000 > $CA/crl/crlnumber
 
 # Certificate variables
 UNIT="Certificate Authority"
-NAME="$CA_NAME"
-EMAIL="$CA_EMAIL"
+NAME="$NAME"
+EMAIL="$EMAIL"
 
 # Generate the certificate authority key
 if hasnt $CA/root/ca.key; then
@@ -65,8 +65,8 @@ fi
 
 # Certificate variables
 UNIT="Certificate Authority OCSP"
-NAME="$CA_NAME OCSP"
-EMAIL="$CA_EMAIL"
+NAME="$NAME OCSP"
+EMAIL="$EMAIL"
 
 # Generate the OCSP key (ocsp.key)
 if hasnt $CA/ocsp/ocsp.key; then  

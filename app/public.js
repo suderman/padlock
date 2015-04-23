@@ -42,14 +42,13 @@ app.get('/ca.crl.pem', function(req, res) {
 // Show index page
 app.get(/\/*/, function(req, res) {
   res.render('index.ejs', { 
-    private:  false, 
-    domain:    process.env.DOMAIN,
-    ca_name:   process.env.CA_NAME, 
-    ca_email:  process.env.CA_EMAIL, 
-    crl_host:  process.env.CRL_HOST, 
-    ocsp_host: process.env.OCSP_HOST, 
-    certs:    [], 
-    revoked:  []
+    private:     false, 
+    domain:      process.env.DOMAIN,
+    name:        process.env.NAME, 
+    email:       process.env.EMAIL, 
+    ocsp_domain: process.env.OCSP_DOMAIN, 
+    certs:       [], 
+    revoked:     []
   });
 });
 

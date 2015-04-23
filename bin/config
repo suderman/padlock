@@ -11,8 +11,8 @@ source $ROOT/.env || source $ROOT/.env-sample
 
 # Default fallbacks
 defined $DOMAIN      || DOMAIN="localhost"
-defined $CA_NAME     || CA_NAME="Certificate Authority"
-defined $CA_EMAIL    || CA_EMAIL="ca@$DOMAIN"
+defined $NAME        || NAME="Certificate Authority"
+defined $EMAIL       || EMAIL="ca@$DOMAIN"
 defined $COUNTRY     || COUNTRY="Country"
 defined $REGION      || REGION="Region"
 defined $CITY        || CITY="City"
@@ -20,5 +20,4 @@ defined $ORG         || ORG="$DOMAIN CA"
 defined $SECURE_PORT || SECURE_PORT="11443"
 defined $PUBLIC_PORT || PUBLIC_PORT="11180"
 defined $OCSP_PORT   || OCSP_PORT="11188"
-defined $CRL_HOST    || CRL_HOST="$DOMAIN:$PUBLIC_PORT"
-defined $OCSP_HOST   || OCSP_HOST="$DOMAIN:$OCSP_PORT"
+defined $OCSP_DOMAIN || OCSP_DOMAIN="$DOMAIN:$OCSP_PORT"

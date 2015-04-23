@@ -77,14 +77,13 @@ app.post('/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, res) {
 // Show index page
 app.get(/\/*/, function(req, res) {
   res.render('index.ejs', { 
-    private:   true, 
-    domain:    process.env.DOMAIN,
-    ca_name:   process.env.CA_NAME, 
-    ca_email:  process.env.CA_EMAIL, 
-    crl_host:  process.env.CRL_HOST, 
-    ocsp_host: process.env.OCSP_HOST, 
-    certs:     exec(`ls ${ca}/certs`, { silent: true }).output.split("\n"), 
-    revoked:   exec(`ls ${ca}/revoked`, { silent: true }).output.split("\n")
+    private:     true, 
+    domain:      process.env.DOMAIN,
+    name:        process.env.NAME, 
+    email:       process.env.EMAIL, 
+    ocsp_domain: process.env.OCSP_DOMAIN, 
+    certs:       exec(`ls ${ca}/certs`, { silent: true }).output.split("\n"), 
+    revoked:     exec(`ls ${ca}/revoked`, { silent: true }).output.split("\n")
   });
 });
 

@@ -123,8 +123,8 @@ keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
 nsComment			              = "OpenSSL Generated Certificate"
 subjectKeyIdentifier        = hash
 authorityKeyIdentifier      = keyid,issuer
-crlDistributionPoints       = URI:http://$CRL_HOST/ca.crl
-authorityInfoAccess         = OCSP;URI:http://$OCSP_HOST
+crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
+authorityInfoAccess         = OCSP;URI:http://$OCSP_DOMAIN
 
 # For normal client use this is typical
 # nsCertType      = client, email
@@ -169,7 +169,7 @@ subjectKeyIdentifier    = hash
 authorityKeyIdentifier  = keyid:always,issuer
 basicConstraints        = CA:TRUE
 keyUsage                = cRLSign, keyCertSign
-crlDistributionPoints   = URI:http://$CRL_HOST/ca.crl
+crlDistributionPoints   = URI:http://$DOMAIN/ca.crl
 
 
 # Key usage: this is typical for a CA certificate. However since it will
@@ -242,7 +242,7 @@ authorityKeyIdentifier=keyid,issuer
 # issuerAltName=issuer:copy
 
 # This is the link where to download the latest Certificate Revocation List (CRL)
-nsCaRevocationUrl     = http://$CRL_HOST/ca.crl
+nsCaRevocationUrl     = http://$DOMAIN/ca.crl
 
 #nsCaRevocationUrl		= http://www.domain.dom/ca-crl.pem
 #nsBaseUrl
