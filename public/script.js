@@ -1,3 +1,12 @@
+// Toggle shift classname when holding shift key
+$(document).on('keyup keydown', function(e) {
+  if (e.shiftKey) { 
+    $('body').addClass('shift');
+  } else { 
+    $('body').removeClass('shift');
+  } 
+});
+
 $('tr.new.cert').each(function(){
   $tr = $(this);
 
@@ -9,6 +18,7 @@ $('tr.new.cert').each(function(){
       $tr.find('td.crt a').attr('href', '/' + name + '.crt');
       $tr.find('td.key a').attr('href', '/' + name + '.key');
       $tr.find('td.pub a').attr('href', '/' + name + '.pub');
+      $tr.find('td.sub a').attr('href', '/' + name + '.sub');
       $tr.find('td.p12 a').attr('href', '/' + name + '.p12');
       $tr.find('td.pem a').attr('href', '/' + name + '.pem');
       $tr.find('td.zip a').attr('href', '/' + name + '.zip');

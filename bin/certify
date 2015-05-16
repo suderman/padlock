@@ -11,6 +11,7 @@ NAME="$1"
 EMAIL=$(echo $NAME | sed 's/^\*\.//')
 EMAIL=$(echo $EMAIL | sed 's/^www\.//')
 if [[ $EMAIL != *@* ]]; then EMAIL="contact@$EMAIL"; fi 
+SUBJECT="/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"
 
 # Stop here if it already exists
 if grep '^V.*'`printf '%q' "/CN=$NAME/"` $CA/db/index; then
@@ -29,18 +30,17 @@ chmod 444 "$CA/certs/$NAME/$NAME.key"
 
 # Extract the public key into its own file ($NAME.pub)
 echo "Extract the public key into its own file ($NAME.pub)"
-openssl rsa -pubout                                  \
-  -in "$CA/certs/$NAME/$NAME.key"                    \
+openssl rsa -pubout                 \
+  -in "$CA/certs/$NAME/$NAME.key"   \
   -out "$CA/certs/$NAME/$NAME.pub"
 
 # Create the request ($NAME.csr)
 echo "Create the request ($NAME.csr)"
-openssl req -new                                                                        \
-  -subj "/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"  \
-  -key "$CA/certs/$NAME/$NAME.key"                                                      \
-  -out "$CA/certs/$NAME/$NAME.csr"                                                      \
+openssl req -new                    \
+  -subj "$SUBJECT"                  \
+  -key "$CA/certs/$NAME/$NAME.key"  \
+  -out "$CA/certs/$NAME/$NAME.csr"  \
   -config $CA/openssl.cnf
-
 
 # Sign the request and create the certificate ($NAME.crt)
 echo "Sign the request and create the certificate ($NAME.crt)"
@@ -65,6 +65,10 @@ openssl pkcs12 -export -password pass:$NAME                   \
 echo "Generate a pem file with the crt & key combined ($NAME.pem)"
 cat "$CA/certs/$NAME/$NAME.crt" "$CA/certs/$NAME/$NAME.key" \
   > "$CA/certs/$NAME/$NAME.pem"
+
+# Save the certificate's subejct
+echo "Save the certificate's subejct ($NAME.sub)"
+echo "$SUBJECT" > "$CA/certs/$NAME/$NAME.sub"
 
 # Create a zip archive of everything ($NAME.zip)
 echo "Create a zip archive of everything ($NAME.zip)"

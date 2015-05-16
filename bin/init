@@ -40,22 +40,29 @@ has $CA/crl/crlnumber || echo 1000 > $CA/crl/crlnumber
 UNIT="Certificate Authority"
 NAME="$NAME"
 EMAIL="$EMAIL"
+SUBJECT="/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"
 
 # Generate the certificate authority key
 if hasnt $CA/root/ca.key; then
-  echo "Generate the certificate authority key"
+  echo "Generate the certificate authority key (ca.key)"
   openssl genrsa -out $CA/root/ca.key 2048 -config $CA/openssl.cnf
   chmod 400 $CA/root/ca.key
 fi
 
 # Generate the certificate authority certificate
 if hasnt $CA/root/ca.crt; then
-  echo "Generate the certificate authority certificate"
-  openssl req -new -x509 -nodes -days 3650 -extensions v3_ca                              \
-    -subj "/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"  \
-    -key $CA/root/ca.key                                                                  \
-    -out $CA/root/ca.crt                                                                  \
+  echo "Generate the certificate authority certificate (ca.crt)"
+  openssl req -new -x509 -nodes -days 3650 -extensions v3_ca  \
+    -subj "$SUBJECT"                                          \
+    -key $CA/root/ca.key                                      \
+    -out $CA/root/ca.crt                                      \
     -config $CA/openssl.cnf
+fi
+
+# Save the certificate authority certificate's subejct
+if hasnt $CA/root/ca.sub; then
+  echo "Save the certificate authority certificate's subejct (ca.sub)"
+  echo "$SUBJECT" > $CA/root/ca.sub
 fi
 
 
@@ -67,6 +74,7 @@ fi
 UNIT="Certificate Authority OCSP"
 NAME="$NAME OCSP"
 EMAIL="$EMAIL"
+SUBJECT="/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"
 
 # Generate the OCSP key (ocsp.key)
 if hasnt $CA/ocsp/ocsp.key; then  
@@ -78,10 +86,10 @@ fi
 # Generate the OCSP certificate signing request (ocsp.csr)
 if hasnt $CA/ocsp/ocsp.crt; then
   echo "Generate the OCSP certificate signing request (ocsp.csr)"
-  openssl req -new -extensions v3_OCSP                                                    \
-    -subj "/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"  \
-    -key    $CA/ocsp/ocsp.key                                                             \
-    -out    $CA/ocsp/ocsp.csr                                                             \
+  openssl req -new -extensions v3_OCSP                             \
+    -subj "$SUBJECT"                                               \
+    -key    $CA/ocsp/ocsp.key                                      \
+    -out    $CA/ocsp/ocsp.csr                                      \
     -config $CA/openssl.cnf
 fi
 
@@ -98,13 +106,18 @@ if hasnt $CA/ocsp/ocsp.crt; then
   rm -f      $CA/ocsp/ocsp.csr
 fi
 
+# Save the OCSP certificate's subejct
+if hasnt $CA/ocsp/ocsp.sub; then
+  echo "Save the OCSP certificate's subejct (ocsp.sub)"
+  echo "$SUBJECT" > $CA/ocsp/ocsp.sub
+fi
 
 # -------------------------------------------
 # Certificate Revocation List
 # -------------------------------------------
 
 # Regenerate the certificate revocation list
-echo "Regenerate the certificate revocation list"
+echo "Regenerate the certificate revocation list (ca.crl, ca.crl.pem)"
 openssl ca -gencrl                         \
   -keyfile $CA/root/ca.key                 \
   -cert    $CA/root/ca.crt                 \

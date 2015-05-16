@@ -19,17 +19,27 @@
         <a class="btn btn-default btn-lg" href="http://<%=ocsp_domain%>/">OCSP</a>
       </div>
 
+      <div class="main shift">
+        <h1><%= name %></h1>
+        <a class="btn btn-primary btn-lg" href="http://<%=domain%>/ca.sub">Root Certificate SUB</a>
+        <a class="btn btn-default btn-lg" href="http://<%=domain%>/ca.crl.pem">CRL PEM</a>
+      </div>
+
       <% if (private) { %>
-        <h2>Signed Certificates</h2>
+        <h2>Client Certificates</h2>
         <table class="table table-striped table-hover">
           <% if (certs.length) { %>
               <% certs.forEach(function(cert, index){ %>
-                <% if (cert != "") { %>
+              <% if ((cert != "") && (cert.indexOf('@') >= 0)) { %>
                 <tr class="cert">
-                  <td class="name"><a href="/<%= cert %>.zip"><%= cert %></a></td>
+                  <td class="name">
+                    <% if (cert.indexOf(auth) >= 0) {%><span>&#128272;</span><%}else{%><span>&#128274;</span><%}%>
+                    <a href="/<%= cert %>.zip"><%= cert %></a>
+                  </td>
                   <td class="crt"><a href="/<%= cert %>.crt">crt</a></td>
                   <td class="key"><a href="/<%= cert %>.key">key</a></td>
                   <td class="pub"><a href="/<%= cert %>.pub">pub</a></td>
+                  <td class="sub"><a href="/<%= cert %>.sub">sub</a></td>
                   <td class="p12"><a href="/<%= cert %>.p12">p12</a></td>
                   <td class="pem"><a href="/<%= cert %>.pem">pem</a></td>
                   <td class="zip"><a href="/<%= cert %>.zip">zip</a></td>
@@ -42,6 +52,40 @@
             <td class="crt"><a>crt</a></td>
             <td class="key"><a>key</a></td>
             <td class="pub"><a>pub</a></td>
+            <td class="sub"><a>sub</a></td>
+            <td class="p12"><a>p12</a></td>
+            <td class="pem"><a>pem</a></td>
+            <td class="zip"><a>zip</a></td>
+          </tr>
+        </table>
+
+        <h2>Server Certificates</h2>
+        <table class="table table-striped table-hover">
+          <% if (certs.length) { %>
+              <% certs.forEach(function(cert, index){ %>
+              <% if ((cert != "") && (cert.indexOf('@') < 0)) { %>
+                <tr class="cert">
+                  <td class="name">
+                    <% if (cert.indexOf(auth) >= 0) {%><span>&#128272;</span><%}else{%><span>&#128274;</span><%}%>
+                    <a href="/<%= cert %>.zip"><%= cert %></a>
+                  </td>
+                  <td class="crt"><a href="/<%= cert %>.crt">crt</a></td>
+                  <td class="key"><a href="/<%= cert %>.key">key</a></td>
+                  <td class="pub"><a href="/<%= cert %>.pub">pub</a></td>
+                  <td class="sub"><a href="/<%= cert %>.sub">sub</a></td>
+                  <td class="p12"><a href="/<%= cert %>.p12">p12</a></td>
+                  <td class="pem"><a href="/<%= cert %>.pem">pem</a></td>
+                  <td class="zip"><a href="/<%= cert %>.zip">zip</a></td>
+                </tr>
+                <% } %>
+              <% }) %>
+          <% } %>
+          <tr class="new cert">
+            <td class="name"><input type="text" class="form-control" id="new" placeholder="Sign New Certificate"><a></a></td>
+            <td class="crt"><a>crt</a></td>
+            <td class="key"><a>key</a></td>
+            <td class="pub"><a>pub</a></td>
+            <td class="sub"><a>sub</a></td>
             <td class="p12"><a>p12</a></td>
             <td class="pem"><a>pem</a></td>
             <td class="zip"><a>zip</a></td>
@@ -54,10 +98,11 @@
               <% revoked.forEach(function(cert, index){ %>
                 <% if (cert != "") { %>
                 <tr class="cert">
-                  <td class="name"><a href="/revoked/<%= cert %>.zip"><%= cert %></a></td>
+                  <td class="name"><span>&#128275;</span><a href="/revoked/<%= cert %>.zip"><%= cert %></a></td>
                   <td class="crt"><a href="/revoked/<%= cert %>.crt">crt</a></td>
                   <td class="key"><a href="/revoked/<%= cert %>.key">key</a></td>
                   <td class="pub"><a href="/revoked/<%= cert %>.pub">pub</a></td>
+                  <td class="sub"><a href="/revoked/<%= cert %>.sub">sub</a></td>
                   <td class="p12"><a href="/revoked/<%= cert %>.p12">p12</a></td>
                   <td class="pem"><a href="/revoked/<%= cert %>.pem">pem</a></td>
                   <td class="zip"><a href="/revoked/<%= cert %>.zip">zip</a></td>

@@ -28,6 +28,11 @@ app.get('/ca.crt', function(req, res) {
   res.sendfile(`${ca}/root/ca.crt`);
 });
 
+// Send the root certificate's subject
+app.get('/ca.sub', function(req, res) {
+  res.sendfile(`${ca}/root/ca.sub`);
+});
+
 // Send the certificate revocation list
 app.get('/ca.crl', function(req, res) {
   res.sendfile(`${ca}/crl/ca.crl`);
@@ -39,7 +44,7 @@ app.get('/ca.crl.pem', function(req, res) {
 });
 
 // Send revoked certificates on GET
-app.get('/revoked/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, res) {
+app.get('/revoked/:filename\.:filetype(crt|key|p12|pem|pub|sub|zip)', function(req, res) {
   var path = `${ca}/revoked/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Send the requested file
@@ -49,7 +54,7 @@ app.get('/revoked/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, 
 });
 
 // Sign/present certificates on GET
-app.get('/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, res) {
+app.get('/:filename\.:filetype(crt|key|p12|pem|pub|sub|zip)', function(req, res) {
   var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Build the requested file if it doesn't exist
@@ -62,7 +67,7 @@ app.get('/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, res) {
 });
 
 // Revoke certicates on POST
-app.post('/:filename\.:filetype(crt|key|p12|pem|pub|zip)', function(req, res) {
+app.post('/:filename\.:filetype(crt|key|p12|pem|pub|sub|zip)', function(req, res) {
   var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Revoke the certificate if it exists
@@ -82,6 +87,7 @@ app.get(/\/*/, function(req, res) {
     name:        process.env.NAME, 
     email:       process.env.EMAIL, 
     ocsp_domain: process.env.OCSP_DOMAIN, 
+    auth:        process.env.AUTH, 
     certs:       exec(`ls ${ca}/certs`, { silent: true }).output.split("\n"), 
     revoked:     exec(`ls ${ca}/revoked`, { silent: true }).output.split("\n")
   });
