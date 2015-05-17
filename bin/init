@@ -58,9 +58,9 @@ if hasnt $CA/root/ca.crt; then
     -config $CA/openssl.cnf
 fi
 
-# Save the certificate authority certificate's subejct
+# Save the certificate authority certificate's subject
 if hasnt $CA/root/ca.sub; then
-  echo "Save the certificate authority certificate's subejct (ca.sub)"
+  echo "Save the certificate authority certificate's subject (ca.sub)"
   SUBJECT=$(openssl x509 -noout -subject -in $CA/root/ca.crt)
   echo ${SUBJECT##*subject= } > $CA/root/ca.sub
 fi
@@ -106,9 +106,9 @@ if hasnt $CA/ocsp/ocsp.crt; then
   rm -f      $CA/ocsp/ocsp.csr
 fi
 
-# Save the OCSP certificate's subejct
+# Save the OCSP certificate's subject
 if hasnt $CA/ocsp/ocsp.sub; then
-  echo "Save the OCSP certificate's subejct (ocsp.sub)"
+  echo "Save the OCSP certificate's subject (ocsp.sub)"
   SUBJECT=$(openssl x509 -noout -subject -in $CA/ocsp/ocsp.crt)
   echo ${SUBJECT##*subject= } > $CA/ocsp/ocsp.sub
 fi

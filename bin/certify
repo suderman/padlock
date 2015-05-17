@@ -67,7 +67,7 @@ cat "$CA/certs/$NAME/$NAME.crt" "$CA/certs/$NAME/$NAME.key" \
   > "$CA/certs/$NAME/$NAME.pem"
 
 # Save the certificate's subject
-echo "Save the certificate's subejct ($NAME.sub)"
+echo "Save the certificate's subject ($NAME.sub)"
 SUBJECT=$(openssl x509 -noout -subject -in "$CA/certs/$NAME/$NAME.crt")
 echo ${SUBJECT##*subject= } > "$CA/certs/$NAME/$NAME.sub"
 
