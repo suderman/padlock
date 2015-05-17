@@ -66,9 +66,11 @@ echo "Generate a pem file with the crt & key combined ($NAME.pem)"
 cat "$CA/certs/$NAME/$NAME.crt" "$CA/certs/$NAME/$NAME.key" \
   > "$CA/certs/$NAME/$NAME.pem"
 
-# Save the certificate's subejct
+# Save the certificate's subject
 echo "Save the certificate's subejct ($NAME.sub)"
-echo "$SUBJECT" > "$CA/certs/$NAME/$NAME.sub"
+SUBJECT=$(openssl x509 -noout -subject -in "$CA/certs/$NAME/$NAME.crt")
+echo ${SUBJECT##*subject= } > "$CA/certs/$NAME/$NAME.sub"
+
 
 # Create a zip archive of everything ($NAME.zip)
 echo "Create a zip archive of everything ($NAME.zip)"

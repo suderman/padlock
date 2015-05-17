@@ -1,5 +1,4 @@
 #!/bin/bash
-rm -rf ~/.local/share/shelper.sh
 source "$(cd "$(dirname $(dirname "${BASH_SOURCE[0]}"))" && pwd -P)/bin/config"
 
 if hasnt openssl; then
@@ -62,7 +61,8 @@ fi
 # Save the certificate authority certificate's subejct
 if hasnt $CA/root/ca.sub; then
   echo "Save the certificate authority certificate's subejct (ca.sub)"
-  echo "$SUBJECT" > $CA/root/ca.sub
+  SUBJECT=$(openssl x509 -noout -subject -in $CA/root/ca.crt)
+  echo ${SUBJECT##*subject= } > $CA/root/ca.sub
 fi
 
 
@@ -109,7 +109,8 @@ fi
 # Save the OCSP certificate's subejct
 if hasnt $CA/ocsp/ocsp.sub; then
   echo "Save the OCSP certificate's subejct (ocsp.sub)"
-  echo "$SUBJECT" > $CA/ocsp/ocsp.sub
+  SUBJECT=$(openssl x509 -noout -subject -in $CA/ocsp/ocsp.crt)
+  echo ${SUBJECT##*subject= } > $CA/ocsp/ocsp.sub
 fi
 
 # -------------------------------------------
