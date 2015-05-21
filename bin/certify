@@ -13,6 +13,18 @@ EMAIL=$(echo $EMAIL | sed 's/^www\.//')
 if [[ $EMAIL != *@* ]]; then EMAIL="contact@$EMAIL"; fi 
 SUBJECT="/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$EMAIL/"
 
+# Subject Alternative Name (skip client certificates)
+if [[ $NAME != *"@"* ]]; then
+  export SAN=$(
+    san="DNS:${NAME},DNS:*.${NAME}"
+    for part in $(echo ${NAME%.*} | tr '.' ' '); do
+      domain=${domain}.${part}
+      san="${san},DNS:${domain#.}.lan,DNS:*.${domain#.}.lan"
+    done;
+    echo $san
+  )
+fi
+
 # Stop here if it already exists
 if grep '^V.*'`printf '%q' "/CN=$NAME/"` $CA/db/index; then
   echo "Stopped: $NAME already exists and is valid."

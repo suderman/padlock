@@ -2,6 +2,7 @@
 # This is mostly being used for generation of certificate requests.
 
 # This definition stops the following lines choking if HOME isn't defined.
+SAN="email:$EMAIL"
 HOME			      = .
 RANDFILE		      = $ENV::HOME/.rnd
 
@@ -84,7 +85,7 @@ x509_extensions	        = v3_ca	            # The extentions to add to the self 
 # WARNING : ancient versions of Netscape crash on BMPStrings or UTF8Strings.
 string_mask             = utf8only
 
-# req_extensions        = v3_req            # The extensions to add to a certificate request
+req_extensions        = v3_req            # The extensions to add to a certificate request
 
 [ req_distinguished_name ]
 countryName			            = Country Name (2 letter code)
@@ -125,6 +126,7 @@ subjectKeyIdentifier        = hash
 authorityKeyIdentifier      = keyid,issuer
 crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
 authorityInfoAccess         = OCSP;URI:http://$OCSP_DOMAIN
+subjectAltName=${ENV::SAN}
 
 # For normal client use this is typical
 # nsCertType      = client, email
@@ -156,20 +158,23 @@ authorityInfoAccess         = OCSP;URI:http://$OCSP_DOMAIN
 basicConstraints        = CA:FALSE
 keyUsage                = nonRepudiation, digitalSignature, keyEncipherment
 extendedKeyUsage        = OCSPSigning
+subjectAltName=${ENV::SAN}
 
 
-[ v3_req ]
 # Extensions to add to a certificate request
+[ v3_req ]
 basicConstraints        = CA:FALSE
 keyUsage                = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName=${ENV::SAN}
 
-[ v3_ca ]
 # Extensions for a typical CA
+[ v3_ca ]
 subjectKeyIdentifier    = hash
 authorityKeyIdentifier  = keyid:always,issuer
 basicConstraints        = CA:TRUE
 keyUsage                = cRLSign, keyCertSign
 crlDistributionPoints   = URI:http://$DOMAIN/ca.crl
+subjectAltName=${ENV::SAN}
 
 
 # Key usage: this is typical for a CA certificate. However since it will
