@@ -8,10 +8,10 @@ $(document).on('keyup keydown', function(e) {
 });
 
 $('tr.new.cert').each(function(){
-  $tr = $(this);
+  var $tr = $(this);
 
   $tr.find('td.name input').on('blur', function(e){
-    name = $(this).val();
+    var name = $(this).val();
     if (name != "") {
       $tr.addClass('ready');
       $tr.find('td.name a').text(name);
@@ -30,7 +30,7 @@ $('tr.new.cert').each(function(){
 
   $tr.find('td.name input').keyup(function(e){
     if(e.keyCode == 13) {
-      name = $(this).val();
+      var name = $(this).val();
       if (name != "") {
         window.location.href = '/' + name + '.zip'
       } else {
@@ -41,14 +41,15 @@ $('tr.new.cert').each(function(){
 
   $tr.find('td.name a').on('click', function(e){
     $tr.removeClass('ready');
+    $tr.find('td.name input').focus();
   });
 
 });
 
 
 $('form.revoke').each(function(){
-  $form = $(this);
-  $select = $form.find('select'); 
+  var $form = $(this);
+  var $select = $form.find('select'); 
 
   $form.find('button').on('click', function(e) {
     if ($select.val() != "") {

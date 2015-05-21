@@ -87,7 +87,6 @@ app.get(/\/*/, function(req, res) {
     name:        process.env.NAME, 
     email:       process.env.EMAIL, 
     ocsp_domain: process.env.OCSP_DOMAIN, 
-    auth:        process.env.AUTH, 
     certs:       exec(`ls ${ca}/certs`, { silent: true }).output.split("\n"), 
     revoked:     exec(`ls ${ca}/revoked`, { silent: true }).output.split("\n")
   });
