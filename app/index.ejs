@@ -33,13 +33,13 @@
               <% if ((cert != "") && (cert.indexOf('@') >= 0)) { %>
                 <tr class="cert">
                   <td class="name"><a href="/<%= cert %>.zip"><%= cert %></a></td>
-                  <td class="crt"><a href="/<%= cert %>.crt">crt</a></td>
-                  <td class="key"><a href="/<%= cert %>.key">key</a></td>
-                  <td class="pub"><a href="/<%= cert %>.pub">pub</a></td>
-                  <td class="sub"><a href="/<%= cert %>.sub">sub</a></td>
-                  <td class="p12"><a href="/<%= cert %>.p12">p12</a></td>
-                  <td class="pem"><a href="/<%= cert %>.pem">pem</a></td>
-                  <td class="zip"><a href="/<%= cert %>.zip">zip</a></td>
+                  <td  class="crt"><a href="/<%= cert %>.crt">crt</a></td>
+                  <td  class="key"><a href="/<%= cert %>.key">key</a></td>
+                  <td  class="pub"><a href="/<%= cert %>.pub">pub</a></td>
+                  <td  class="sub"><a href="/<%= cert %>.sub">sub</a></td>
+                  <td  class="p12"><a href="/<%= cert %>.p12">p12</a></td>
+                  <td class="ovpn"><a href="/<%= cert %>.ovpn">ovpn</a></td>
+                  <td  class="zip"><a href="/<%= cert %>.zip">zip</a></td>
                 </tr>
                 <% } %>
               <% }) %>
@@ -51,7 +51,7 @@
             <td class="pub"><a>pub</a></td>
             <td class="sub"><a>sub</a></td>
             <td class="p12"><a>p12</a></td>
-            <td class="pem"><a>pem</a></td>
+            <td class="ovpn"><a>ovpn</a></td>
             <td class="zip"><a>zip</a></td>
           </tr>
         </table>
@@ -63,26 +63,26 @@
               <% if ((cert != "") && (cert.indexOf('@') < 0)) { %>
                 <tr class="cert">
                   <td class="name"><a href="/<%= cert %>.zip"><%= cert %></a></td>
-                  <td class="crt"><a href="/<%= cert %>.crt">crt</a></td>
-                  <td class="key"><a href="/<%= cert %>.key">key</a></td>
-                  <td class="pub"><a href="/<%= cert %>.pub">pub</a></td>
-                  <td class="sub"><a href="/<%= cert %>.sub">sub</a></td>
-                  <td class="p12"><a href="/<%= cert %>.p12">p12</a></td>
-                  <td class="pem"><a href="/<%= cert %>.pem">pem</a></td>
-                  <td class="zip"><a href="/<%= cert %>.zip">zip</a></td>
+                  <td  class="crt"><a href="/<%= cert %>.crt">crt</a></td>
+                  <td  class="key"><a href="/<%= cert %>.key">key</a></td>
+                  <td  class="pub"><a href="/<%= cert %>.pub">pub</a></td>
+                  <td  class="sub"><a href="/<%= cert %>.sub">sub</a></td>
+                  <td  class="p12"><a href="/<%= cert %>.p12">p12</a></td>
+                  <td class="ovpn"><a href="/<%= cert %>.ovpn">ovpn</a></td>
+                  <td  class="zip"><a href="/<%= cert %>.zip">zip</a></td>
                 </tr>
                 <% } %>
               <% }) %>
           <% } %>
           <tr class="new cert">
             <td class="name"><input type="text" class="form-control" placeholder="Sign New Certificate"><a></a></td>
-            <td class="crt"><a>crt</a></td>
-            <td class="key"><a>key</a></td>
-            <td class="pub"><a>pub</a></td>
-            <td class="sub"><a>sub</a></td>
-            <td class="p12"><a>p12</a></td>
-            <td class="pem"><a>pem</a></td>
-            <td class="zip"><a>zip</a></td>
+            <td  class="crt"><a>crt</a></td>
+            <td  class="key"><a>key</a></td>
+            <td  class="pub"><a>pub</a></td>
+            <td  class="sub"><a>sub</a></td>
+            <td  class="p12"><a>p12</a></td>
+            <td class="ovpn"><a>ovpn</a></td>
+            <td  class="zip"><a>zip</a></td>
           </tr>
         </table>
 
@@ -93,13 +93,13 @@
                 <% if (cert != "") { %>
                 <tr class="cert">
                   <td class="name"><a href="/revoked/<%= cert %>.zip"><%= cert %></a></td>
-                  <td class="crt"><a href="/revoked/<%= cert %>.crt">crt</a></td>
-                  <td class="key"><a href="/revoked/<%= cert %>.key">key</a></td>
-                  <td class="pub"><a href="/revoked/<%= cert %>.pub">pub</a></td>
-                  <td class="sub"><a href="/revoked/<%= cert %>.sub">sub</a></td>
-                  <td class="p12"><a href="/revoked/<%= cert %>.p12">p12</a></td>
-                  <td class="pem"><a href="/revoked/<%= cert %>.pem">pem</a></td>
-                  <td class="zip"><a href="/revoked/<%= cert %>.zip">zip</a></td>
+                  <td  class="crt"><a href="/revoked/<%= cert %>.crt">crt</a></td>
+                  <td  class="key"><a href="/revoked/<%= cert %>.key">key</a></td>
+                  <td  class="pub"><a href="/revoked/<%= cert %>.pub">pub</a></td>
+                  <td  class="sub"><a href="/revoked/<%= cert %>.sub">sub</a></td>
+                  <td  class="p12"><a href="/revoked/<%= cert %>.p12">p12</a></td>
+                  <td class="ovpn"><a href="/revoked/<%= cert %>.ovpn">ovpn</a></td>
+                  <td  class="zip"><a href="/revoked/<%= cert %>.zip">zip</a></td>
                 </tr>
                 <% } %>
               <% }) %>

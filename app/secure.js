@@ -44,7 +44,7 @@ app.get('/ca.crl.pem', function(req, res) {
 });
 
 // Send revoked certificates on GET
-app.get('/revoked/:filename\.:filetype(crt|key|p12|pem|pub|sub|zip)', function(req, res) {
+app.get('/revoked/:filename\.:filetype(crt|key|p12|pub|sub|ovpn|zip)', function(req, res) {
   var path = `${ca}/revoked/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Send the requested file
@@ -54,7 +54,7 @@ app.get('/revoked/:filename\.:filetype(crt|key|p12|pem|pub|sub|zip)', function(r
 });
 
 // Sign/present certificates on GET
-app.get('/:filename\.:filetype(crt|key|p12|pem|pub|sub|zip)', function(req, res) {
+app.get('/:filename\.:filetype(crt|key|p12|pub|sub|ovpn|zip)', function(req, res) {
   var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Build the requested file if it doesn't exist
@@ -67,7 +67,7 @@ app.get('/:filename\.:filetype(crt|key|p12|pem|pub|sub|zip)', function(req, res)
 });
 
 // Revoke certicates on POST
-app.post('/:filename\.:filetype(crt|key|p12|pem|pub|sub|zip)', function(req, res) {
+app.post('/:filename\.:filetype(crt|key|p12|pub|sub|ovpn|zip)', function(req, res) {
   var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Revoke the certificate if it exists

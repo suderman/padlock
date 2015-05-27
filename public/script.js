@@ -11,6 +11,7 @@ $('tr.new.cert').each(function(){
   var $tr = $(this);
 
   $tr.find('td.name input').on('blur', function(e){
+    console.log('blur')
     var name = $(this).val();
     if (name != "") {
       $tr.addClass('ready');
@@ -20,7 +21,7 @@ $('tr.new.cert').each(function(){
       $tr.find('td.pub a').attr('href', '/' + name + '.pub');
       $tr.find('td.sub a').attr('href', '/' + name + '.sub');
       $tr.find('td.p12 a').attr('href', '/' + name + '.p12');
-      $tr.find('td.pem a').attr('href', '/' + name + '.pem');
+      $tr.find('td.ovpn a').attr('href', '/' + name + '.ovpn');
       $tr.find('td.zip a').attr('href', '/' + name + '.zip');
     } else {
       $tr.removeClass('ready');

@@ -30,7 +30,7 @@ form.revoke .form-group > div { padding-left: 7px; }
   tr.cert td.name span { display: none; }
   tr.cert td.sub { display: none; }
   tr.cert td.pub { display: none; }
-  tr.cert td.pem { display: none; }
+  tr.cert td.ovpn { display: none; }
   tr.cert td.zip { display: none; }
 }
 .clear { clear: both; height: 0; }

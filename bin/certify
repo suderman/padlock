@@ -73,16 +73,44 @@ openssl pkcs12 -export -password pass:$NAME                   \
   -in      "$CA/certs/$NAME/$NAME.crt"                        \
   -out     "$CA/certs/$NAME/$NAME.p12"
 
-# Generate a pem file with the crt & key combined ($NAME.pem)
-echo "Generate a pem file with the crt & key combined ($NAME.pem)"
-cat "$CA/certs/$NAME/$NAME.crt" "$CA/certs/$NAME/$NAME.key" \
-  > "$CA/certs/$NAME/$NAME.pem"
-
 # Save the certificate's subject
 echo "Save the certificate's subject ($NAME.sub)"
 SUBJECT=$(openssl x509 -noout -subject -in "$CA/certs/$NAME/$NAME.crt")
 echo ${SUBJECT##*subject= } > "$CA/certs/$NAME/$NAME.sub"
 
+echo "Create the ovpn ($NAME.ovpn)"
+cat > "$CA/certs/$NAME/$NAME.ovpn" <<EOF
+client
+nobind
+redirect-gateway def1
+
+<key>
+$(cat $CA/certs/$NAME/$NAME.key)
+</key>
+<cert>
+$(cat $CA/certs/$NAME/$NAME.crt)
+</cert>
+<ca>
+$(cat $CA/root/ca.crt)
+</ca>
+
+<connection>
+dev tap
+remote ${NAME##*@} 1194 udp
+</connection>
+<connection>
+dev tun
+remote ${NAME##*@} 1194 udp
+</connection>
+<connection>
+dev tap
+remote ${NAME##*@} 443 tcp-client
+</connection>
+<connection>
+dev tun
+remote ${NAME##*@} 443 tcp-client
+</connection>
+EOF
 
 # Create a zip archive of everything ($NAME.zip)
 echo "Create a zip archive of everything ($NAME.zip)"
