@@ -43,6 +43,11 @@ app.get('/ca.crl.pem', function(req, res) {
   res.sendfile(`${ca}/crl/ca.crl.pem`);
 });
 
+// Send the diffie hellman parameters
+app.get('/dh.pem', function(req, res) {
+  res.sendfile(`${ca}/root/dh.pem`);
+});
+
 // Send revoked certificates on GET
 app.get('/revoked/:filename\.:filetype(crt|key|p12|pub|sub|ovpn|zip)', function(req, res) {
   var path = `${ca}/revoked/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;

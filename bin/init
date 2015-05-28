@@ -6,13 +6,18 @@ if hasnt openssl; then
   exit 1;
 fi
 
+if hasnt openvpn; then
+  msg "Please install openvpn, ie: sudo apt-get install openvpn"
+  exit 1;
+fi
+
 if hasnt zip; then
   msg "Please install zip, ie: sudo apt-get install zip"
   exit 1;
 fi
 
 # Copy configuration and deref variables
-copy "$ROOT/openssl.cnf" "$CA/openssl.cnf"
+copy "$ROOT/templates/openssl.cnf" "$CA/openssl.cnf"
 deref "$CA/openssl.cnf"
 
 # Create directory structure
@@ -43,14 +48,29 @@ SUBJECT="/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$E
 
 # Generate the certificate authority key
 if hasnt $CA/root/ca.key; then
-  echo "Generate the certificate authority key (ca.key)"
+  msg "Generate the certificate authority key (ca.key)"
   openssl genrsa -out $CA/root/ca.key 2048 -config $CA/openssl.cnf
   chmod 400 $CA/root/ca.key
 fi
 
+# Generate the TLS auth key (ta.key)
+if hasnt $CA/root/ta.key; then
+  msg "Generate the TLS auth key (ta.key)"
+  openvpn --genkey --secret $CA/root/ta.key
+  chmod 400 $CA/root/ta.key
+fi
+
+# Generate diffie hellman parameters (dh.pem)
+if hasnt $CA/root/dh.pem; then
+  msg "Generate diffie hellman parameters (dh.pem)"
+  openssl dhparam -out $CA/root/dh.pem 512
+  # openssl dhparam -out $CA/root/dh.pem 2048
+  chmod 400 $CA/root/dh.pem
+fi
+
 # Generate the certificate authority certificate
 if hasnt $CA/root/ca.crt; then
-  echo "Generate the certificate authority certificate (ca.crt)"
+  msg "Generate the certificate authority certificate (ca.crt)"
   openssl req -new -x509 -nodes -days 3650 -extensions v3_ca  \
     -subj "$SUBJECT"                                          \
     -key $CA/root/ca.key                                      \
@@ -60,7 +80,7 @@ fi
 
 # Save the certificate authority certificate's subject
 if hasnt $CA/root/ca.sub; then
-  echo "Save the certificate authority certificate's subject (ca.sub)"
+  msg "Save the certificate authority certificate's subject (ca.sub)"
   SUBJECT=$(openssl x509 -noout -subject -in $CA/root/ca.crt)
   echo ${SUBJECT##*subject= } > $CA/root/ca.sub
 fi
@@ -78,14 +98,14 @@ SUBJECT="/C=$COUNTRY/ST=$REGION/L=$CITY/O=$ORG/OU=$UNIT/CN=$NAME/emailAddress=$E
 
 # Generate the OCSP key (ocsp.key)
 if hasnt $CA/ocsp/ocsp.key; then  
-  echo "Generate the OCSP key (ocsp.key)"
+  msg "Generate the OCSP key (ocsp.key)"
   openssl genrsa -out $CA/ocsp/ocsp.key 2048 -config $CA/openssl.cnf
   chmod 400 $CA/ocsp/ocsp.key
 fi
 
 # Generate the OCSP certificate signing request (ocsp.csr)
 if hasnt $CA/ocsp/ocsp.crt; then
-  echo "Generate the OCSP certificate signing request (ocsp.csr)"
+  msg "Generate the OCSP certificate signing request (ocsp.csr)"
   openssl req -new -extensions v3_OCSP                             \
     -subj "$SUBJECT"                                               \
     -key    $CA/ocsp/ocsp.key                                      \
@@ -95,7 +115,7 @@ fi
 
 # Sign the request and create the certificate (ocsp.crt)
 if hasnt $CA/ocsp/ocsp.crt; then
-  echo "Sign the request and create the certificate (ocsp.crt)"
+  msg "Sign the request and create the certificate (ocsp.crt)"
   yes | openssl ca -notext -md sha256 -days 3650 -extensions v3_OCSP \
     -keyfile $CA/root/ca.key                                         \
     -cert    $CA/root/ca.crt                                         \
@@ -108,7 +128,7 @@ fi
 
 # Save the OCSP certificate's subject
 if hasnt $CA/ocsp/ocsp.sub; then
-  echo "Save the OCSP certificate's subject (ocsp.sub)"
+  msg "Save the OCSP certificate's subject (ocsp.sub)"
   SUBJECT=$(openssl x509 -noout -subject -in $CA/ocsp/ocsp.crt)
   echo ${SUBJECT##*subject= } > $CA/ocsp/ocsp.sub
 fi
@@ -118,7 +138,7 @@ fi
 # -------------------------------------------
 
 # Regenerate the certificate revocation list
-echo "Regenerate the certificate revocation list (ca.crl, ca.crl.pem)"
+msg "Regenerate the certificate revocation list (ca.crl, ca.crl.pem)"
 openssl ca -gencrl                         \
   -keyfile $CA/root/ca.key                 \
   -cert    $CA/root/ca.crt                 \

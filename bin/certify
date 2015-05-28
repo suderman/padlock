@@ -25,94 +25,119 @@ if [[ $NAME != *"@"* ]]; then
   )
 fi
 
-# Stop here if it already exists
-if grep '^V.*'`printf '%q' "/CN=$NAME/"` $CA/db/index; then
-  echo "Stopped: $NAME already exists and is valid."
-  exit; 
+# Create the cert directory and copy the CA certificate (ca.crt)
+if hasnt "$CA/certs/$NAME/ca.crt"; then
+  msg "Create the cert directory and copy the CA certificate (ca.crt)"
+  copy $CA/root/ca.crt "$CA/certs/$NAME/ca.crt"
 fi
 
-# Create the cert directory and copy the CA certificate (ca.crt)
-echo "Create the cert directory and copy the CA certificate (ca.crt)"
-copy $CA/root/ca.crt "$CA/certs/$NAME/ca.crt"
-
 # Generate the private/public key pair ($NAME.key)
-echo "Generate the private/public key pair ($NAME.key)"
-openssl genrsa -out "$CA/certs/$NAME/$NAME.key" 2048 -config $CA/openssl.cnf
-chmod 444 "$CA/certs/$NAME/$NAME.key"
+if hasnt "$CA/certs/$NAME/$NAME.key"; then
+  msg "Generate the private/public key pair ($NAME.key)"
+  openssl genrsa -out "$CA/certs/$NAME/$NAME.key" 2048 -config $CA/openssl.cnf
+  chmod 444 "$CA/certs/$NAME/$NAME.key"
+fi
 
 # Extract the public key into its own file ($NAME.pub)
-echo "Extract the public key into its own file ($NAME.pub)"
-openssl rsa -pubout                 \
-  -in "$CA/certs/$NAME/$NAME.key"   \
-  -out "$CA/certs/$NAME/$NAME.pub"
+if hasnt "$CA/certs/$NAME/$NAME.pub"; then
+  msg "Extract the public key into its own file ($NAME.pub)"
+  openssl rsa -pubout                 \
+    -in "$CA/certs/$NAME/$NAME.key"   \
+    -out "$CA/certs/$NAME/$NAME.pub"
+fi
 
-# Create the request ($NAME.csr)
-echo "Create the request ($NAME.csr)"
-openssl req -new                    \
-  -subj "$SUBJECT"                  \
-  -key "$CA/certs/$NAME/$NAME.key"  \
-  -out "$CA/certs/$NAME/$NAME.csr"  \
-  -config $CA/openssl.cnf
+# Ensure valid certificate doesn't yet exist
+if ! grep '^V.*'`printf '%q' "/CN=$NAME/"` $CA/db/index; then
 
-# Sign the request and create the certificate ($NAME.crt)
-echo "Sign the request and create the certificate ($NAME.crt)"
-yes | openssl ca -notext -md sha256 -days 3650 -extensions usr_cert  \
-  -keyfile $CA/root/ca.key                                           \
-  -cert    $CA/root/ca.crt                                           \
-  -in      "$CA/certs/$NAME/$NAME.csr"                               \
-  -out     "$CA/certs/$NAME/$NAME.crt"                               \
-  -config  $CA/openssl.cnf
-chmod 600 "$CA/certs/$NAME/$NAME.crt"
-rm -f "$CA/certs/$NAME/$NAME.csr"
+  # Create the request ($NAME.csr)
+  if hasnt "$CA/certs/$NAME/$NAME.csr"; then
+    msg "Create the request ($NAME.csr)"
+    openssl req -new                    \
+      -subj "$SUBJECT"                  \
+      -key "$CA/certs/$NAME/$NAME.key"  \
+      -out "$CA/certs/$NAME/$NAME.csr"  \
+      -config $CA/openssl.cnf
+  fi
+
+  # Sign the request and create the certificate ($NAME.crt)
+  if hasnt "$CA/certs/$NAME/$NAME.crt"; then
+
+    # Client or server certificate
+    if [[ $NAME = *"@"* ]]; then
+      msg "Sign the request and create the client certificate ($NAME.crt)"
+      ext=client_cert
+    else
+      msg "Sign the request and create the server certificate ($NAME.crt)"
+      ext=server_cert
+    fi
+
+    # Create the certificate
+    yes | openssl ca -notext -md sha256 -days 3650 -extensions $ext \
+      -keyfile $CA/root/ca.key                                      \
+      -cert    $CA/root/ca.crt                                      \
+      -in      "$CA/certs/$NAME/$NAME.csr"                          \
+      -out     "$CA/certs/$NAME/$NAME.crt"                          \
+      -config  $CA/openssl.cnf
+    chmod 600 "$CA/certs/$NAME/$NAME.crt"
+  fi
+
+  rm -f "$CA/certs/$NAME/$NAME.csr"
+fi
 
 # Generate a p12 file from everything we just made ($NAME.p12)
-echo "Generate a p12 file from everything we just made ($NAME.p12)"
-openssl pkcs12 -export -password pass:$NAME                   \
-  -certfile $CA/root/ca.crt                                   \
-  -inkey   "$CA/certs/$NAME/$NAME.key"                        \
-  -in      "$CA/certs/$NAME/$NAME.crt"                        \
-  -out     "$CA/certs/$NAME/$NAME.p12"
+if hasnt "$CA/certs/$NAME/$NAME.p12"; then
+  msg "Generate a p12 file from everything we just made ($NAME.p12)"
+  openssl pkcs12 -export -password pass:$NAME                   \
+    -certfile $CA/root/ca.crt                                   \
+    -inkey   "$CA/certs/$NAME/$NAME.key"                        \
+    -in      "$CA/certs/$NAME/$NAME.crt"                        \
+    -out     "$CA/certs/$NAME/$NAME.p12"
+fi
 
-# Save the certificate's subject
-echo "Save the certificate's subject ($NAME.sub)"
-SUBJECT=$(openssl x509 -noout -subject -in "$CA/certs/$NAME/$NAME.crt")
-echo ${SUBJECT##*subject= } > "$CA/certs/$NAME/$NAME.sub"
+# Save the certificate's subject ($NAME.sub)
+if hasnt "$CA/certs/$NAME/$NAME.sub"; then
+  msg "Save the certificate's subject ($NAME.sub)"
+  SUBJECT=$(openssl x509 -noout -subject -in "$CA/certs/$NAME/$NAME.crt")
+  echo ${SUBJECT##*subject= } > "$CA/certs/$NAME/$NAME.sub"
+fi
 
-echo "Create the ovpn ($NAME.ovpn)"
-cat > "$CA/certs/$NAME/$NAME.ovpn" <<EOF
-client
-nobind
-redirect-gateway def1
+# Create the ovpn ($NAME.ovpn)"
+OVPN="$CA/certs/$NAME/$NAME.ovpn"
+if hasnt "$OVPN"; then
 
-<key>
-$(cat $CA/certs/$NAME/$NAME.key)
-</key>
-<cert>
-$(cat $CA/certs/$NAME/$NAME.crt)
-</cert>
-<ca>
-$(cat $CA/root/ca.crt)
-</ca>
+  # Client profile
+  if [[ $NAME = *"@"* ]]; then
+    msg "Create client ovpn file ($NAME.ovpn)"
+    copy "$ROOT/templates/client.ovpn" $OVPN
+    DOMAIN="${NAME##*@}" deref $OVPN
 
-<connection>
-dev tap
-remote ${NAME##*@} 1194 udp
-</connection>
-<connection>
-dev tun
-remote ${NAME##*@} 1194 udp
-</connection>
-<connection>
-dev tap
-remote ${NAME##*@} 443 tcp-client
-</connection>
-<connection>
-dev tun
-remote ${NAME##*@} 443 tcp-client
-</connection>
-EOF
+  # Server profile
+  else
+    msg "Create server ovpn file ($NAME.ovpn)"
+    copy "$ROOT/templates/server.ovpn" $OVPN
+    echo "<dh>"                  >> $OVPN
+    cat  $CA/root/dh.pem         >> $OVPN
+    echo "</dh>"                 >> $OVPN
+  fi
+
+  # Append key and cert info
+  echo "<key>"                   >> $OVPN
+  cat  $CA/certs/$NAME/$NAME.key >> $OVPN
+  echo "</key>"                  >> $OVPN
+  echo "<cert>"                  >> $OVPN
+  cat  $CA/certs/$NAME/$NAME.crt >> $OVPN
+  echo "</cert>"                 >> $OVPN
+  echo "<ca>"                    >> $OVPN
+  cat  $CA/root/ca.crt           >> $OVPN
+  echo "</ca>"                   >> $OVPN
+  echo "<tls-auth>"              >> $OVPN
+  cat  $CA/root/ta.key           >> $OVPN
+  echo "</tls-auth>"             >> $OVPN
+fi
 
 # Create a zip archive of everything ($NAME.zip)
-echo "Create a zip archive of everything ($NAME.zip)"
-rm -f  "$CA/certs/$NAME/$NAME.zip"
-zip -j "$CA/certs/$NAME/$NAME.zip" "$CA/certs/$NAME/"*
+if hasnt "$CA/certs/$NAME/$NAME.zip"; then
+  msg "Create a zip archive of everything ($NAME.zip)"
+  rm -f  "$CA/certs/$NAME/$NAME.zip"
+  zip -j "$CA/certs/$NAME/$NAME.zip" "$CA/certs/$NAME/"*
+fi

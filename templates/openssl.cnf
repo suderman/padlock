@@ -1,0 +1,153 @@
+# OpenSSL configuration file for Padlock
+# https://github.com/suderman/padlock
+
+SAN="email:$EMAIL"
+HOME=.
+RANDFIL=$ENV::HOME/.rnd
+
+[ ca ]
+default_ca                  = CA_default          # The default ca section
+
+[ CA_default ]
+dir                         = $CA
+certs                       = $dir/certs          # Where the issued certs are kept
+crl_dir                     = $dir/crl            # Where the issued crl are kept
+database                    = $dir/db/index       # database index file.
+unique_subject              = yes                 # Set to 'no' to allow creation of several ctificates with same subject.
+new_certs_dir               = $dir/newcerts       # default place for new certs.
+certificate                 = $dir/root/ca.crt    # The CA certificate
+serial                      = $dir/db/serial      # The current serial number
+crlnumber                   = $dir/crl/crlnumber  # the current crl number must be commented out to leave a V1 CRL
+crl                         = $dir/crl/ca.crl     # The current CRL
+private_key                 = $dir/root/ca.key    # The private key
+RANDFILE                    = $dir/root/.rand     # private random number file
+x509_extensions             = usr_cert            # The extentions to add to the cert
+name_opt                    = ca_default          # Subject Name options
+cert_opt                    = ca_default          # Certificate field options
+crl_extensions              = crl_ext             # Extensions to add to a CRL
+default_days                = 3650                # how long to certify for
+default_crl_days            = 30                  # how long before next CRL
+default_md                  = default             # use public key default MD
+preserve                    = no                  # keep passed DN ordering
+policy                      = policy_match
+
+[ policy_match ]
+countryName                 = match
+stateOrProvinceName         = match
+organizationName            = match
+organizationalUnitName      = optional
+commonName                  = supplied
+emailAddress                = optional
+
+[ policy_anything ]
+countryName                 = optional
+stateOrProvinceName         = optional
+localityName                = optional
+organizationName            = optional
+organizationalUnitName      = optional
+commonName                  = supplied
+emailAddress                = optional
+
+[ req ]
+default_bits                = 2048
+default_keyfile             = req.key
+distinguished_name          = req_distinguished_name
+attributes                  = req_attributes
+x509_extensions             = v3_ca                   # The extentions to add to the self signed cert
+string_mask                 = utf8only
+req_extensions              = v3_req                  # The extensions to add to a certificate request
+
+[ req_distinguished_name ]
+countryName                 = Country Name (2 letter code)
+countryName_default         = $COUNTRY
+countryName_min             = 2
+countryName_max             = 2
+stateOrProvinceName         = State or Province Name (full name)
+stateOrProvinceName_default = $REGION
+localityName                = Locality Name (eg, city)
+localityName_default        = $CITY
+0.organizationName          = Organization Name (eg, company)
+0.organizationName_default  = $ORG
+organizationalUnitName      = Organizational Unit Name (eg, section)
+commonName                  = Common Name (e.g. server FQDN or YOUR name)
+commonName_max              = 64
+emailAddress                = Email Address
+emailAddress_max            = 64
+
+[ req_attributes ]
+challengePassword           = A challenge password
+challengePassword_min       = 4
+challengePassword_max       = 20
+unstructuredName            = An optional company name
+
+# Extensions added when 'ca' signs a request
+[ usr_cert ]
+basicConstraints            = CA:FALSE
+keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
+nsComment                   = "OpenSSL Generated Certificate"
+nsCertType                  = client, email
+subjectKeyIdentifier        = hash
+authorityKeyIdentifier      = keyid,issuer
+crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
+authorityInfoAccess         = OCSP;URI:http://$OCSP_DOMAIN
+subjectAltName=${ENV::SAN}
+
+# Extensions added when 'ca' signs a client request
+[ client_cert ]
+basicConstraints            = CA:FALSE
+keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
+nsComment                   = "OpenSSL Generated Client Certificate"
+nsCertType                  = client, email
+subjectKeyIdentifier        = hash
+authorityKeyIdentifier      = keyid,issuer
+crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
+authorityInfoAccess         = OCSP;URI:http://$OCSP_DOMAIN
+subjectAltName=${ENV::SAN}
+
+# Extensions added when 'ca' signs a server request
+[ server_cert ]
+basicConstraints            = CA:FALSE
+keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
+nsComment                   = "OpenSSL Generated Server Certificate"
+nsCertType                  = server
+subjectKeyIdentifier        = hash
+authorityKeyIdentifier      = keyid,issuer
+crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
+authorityInfoAccess         = OCSP;URI:http://$OCSP_DOMAIN
+subjectAltName=${ENV::SAN}
+
+# Extensions for an OCSP server
+[ v3_OCSP ]
+basicConstraints            = CA:FALSE
+keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
+extendedKeyUsage            = OCSPSigning
+subjectAltName=${ENV::SAN}
+
+# Extensions to add to a certificate request
+[ v3_req ]
+basicConstraints            = CA:FALSE
+keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName=${ENV::SAN}
+
+# Extensions for a typical CA
+[ v3_ca ]
+subjectKeyIdentifier        = hash
+authorityKeyIdentifier      = keyid:always,issuer
+basicConstraints            = CA:TRUE
+keyUsage                    = cRLSign, keyCertSign
+nsCertType                  = sslCA, emailCA
+crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
+subjectAltName=${ENV::SAN}
+
+# CRL extensions.
+[ crl_ext ]
+authorityKeyIdentifier      = keyid:always
+
+# These extensions should be added when creating a proxy certificate
+[ proxy_cert_ext ]
+basicConstraints            = CA:FALSE
+nsComment                   = "OpenSSL Generated Certificate"
+subjectKeyIdentifier        = hash
+authorityKeyIdentifier      = keyid,issuer
+nsCaRevocationUrl           = http://$DOMAIN/ca.crl
+proxyCertInfo               = critical,language:id-ppl-anyLanguage,pathlen:3,policy:foo

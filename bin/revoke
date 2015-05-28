@@ -33,5 +33,5 @@ if grep '^V.*'`printf '%q' "/CN=$NAME/"` $CA/db/index; then
   mv "$CA/certs/$NAME" "$CA/revoked/$NAME"
 
 else
-  echo "Revoke issue: $NAME doesn't exist."
+  msg "Revoke issue: $NAME doesn't exist."
 fi

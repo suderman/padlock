@@ -7,13 +7,13 @@ MINUTES_VALID="5"
 
 # Ensure variables exist
 if undefined $FILENAME || undefined $MINUTES_VALID; then
-  echo "OCSP request missing filename"
+  msg "OCSP request missing filename"
   exit 2;
 fi
 
 # Ensure request exists on disk
 if hasnt "$CA/ocsp/requests/$FILENAME"; then
-  echo "OCSP request missing: $CA/ocsp/requests/$FILENAME"
+  msg "OCSP request missing: $CA/ocsp/requests/$FILENAME"
   exit 1;
 fi
 
