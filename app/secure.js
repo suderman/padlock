@@ -96,10 +96,10 @@ app.post('/:filename\.:filetype(pub|sub|p12|ovpn)', function(req, res) {
 
   // Revoke the certificate if it exists
   if (test('-f', path)) {
-    exec(`rm -rf '${req.params.filename}'`);
-    res.send(200, req.params.filename + ' is now deleted');
+    exec(`rm -rf '${path}'`);
+    res.send(200, path + ' is now deleted');
   } else {
-    res.send(200, req.params.filename + " doesn't exist");
+    res.send(200, path + " doesn't exist");
   }
 });
 
