@@ -43,6 +43,12 @@ app.get('/ca.crl.pem', function(req, res) {
   res.sendfile(`${ca}/crl/ca.crl.pem`);
 });
 
+// Nuke all certicates on CA POST
+app.post('/ca\.:filetype(crt|sub|crl|crl.pem)', function(req, res) {
+  exec(`${bin}/reset`);
+  res.send(200, 'Certifcate Authority and all certificates deleted. Rebuilding new CA...');
+});
+
 // Send the diffie hellman parameters
 app.get('/dh.pem', function(req, res) {
   res.sendfile(`${ca}/root/dh.pem`);

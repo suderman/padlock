@@ -1,0 +1,8 @@
+#!/bin/bash
+source "$(cd "$(dirname $(dirname "${BASH_SOURCE[0]}"))" && pwd -P)/bin/config"
+
+msg "Deleting CA directory"
+rm  -rf $ROOT/ca
+
+msg "Rebuilding new CA directory"
+$ROOT/bin/init

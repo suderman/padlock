@@ -54,7 +54,7 @@ $('form.revoke').each(function(){
 
   $form.find('button').on('click', function(e) {
     if ($select.val() != "") {
-      var action = "/" + $select.val() + '.zip';
+      var action = "/" + $select.val() + '.crt';
       $form.attr('action', action);
       $form.submit();
     }

@@ -1,9 +1,6 @@
 # OpenSSL configuration file for Padlock
 # https://github.com/suderman/padlock
-
 SAN="email:$EMAIL"
-HOME=.
-RANDFIL=$ENV::HOME/.rnd
 
 [ ca ]
 default_ca                  = CA_default          # The default ca section
@@ -35,15 +32,6 @@ policy                      = policy_match
 countryName                 = match
 stateOrProvinceName         = match
 organizationName            = match
-organizationalUnitName      = optional
-commonName                  = supplied
-emailAddress                = optional
-
-[ policy_anything ]
-countryName                 = optional
-stateOrProvinceName         = optional
-localityName                = optional
-organizationName            = optional
 organizationalUnitName      = optional
 commonName                  = supplied
 emailAddress                = optional
@@ -80,24 +68,42 @@ challengePassword_min       = 4
 challengePassword_max       = 20
 unstructuredName            = An optional company name
 
+# Extensions to add to a certificate request
+[ v3_req ]
+basicConstraints            = CA:FALSE
+keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName=${ENV::SAN}
+
+# Extensions for a typical CA
+[ v3_ca ]
+basicConstraints            = critical, CA:TRUE
+keyUsage                    = cRLSign, keyCertSign
+extendedKeyUsage            = serverAuth, clientAuth
+nsCertType                  = sslCA, emailCA
+nsComment                   = "OpenSSL CA Certificate"
+subjectKeyIdentifier        = hash
+authorityKeyIdentifier      = keyid:always,issuer
+crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
+subjectAltName=${ENV::SAN}
+
+# CRL extensions
+[ crl_ext ]
+basicConstraints            = CA:FALSE
+keyUsage                    = digitalSignature, keyEncipherment
+nsComment                   = "OpenSSL CRL"
+authorityKeyIdentifier      = keyid:always
+
 # Extensions added when 'ca' signs a request
 [ usr_cert ]
 basicConstraints            = CA:FALSE
-keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
-nsComment                   = "OpenSSL Generated Certificate"
-nsCertType                  = client, email
-subjectKeyIdentifier        = hash
-authorityKeyIdentifier      = keyid,issuer
-crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
-authorityInfoAccess         = OCSP;URI:http://$OCSP_DOMAIN
-subjectAltName=${ENV::SAN}
 
 # Extensions added when 'ca' signs a client request
 [ client_cert ]
 basicConstraints            = CA:FALSE
 keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
-nsComment                   = "OpenSSL Generated Client Certificate"
+extendedKeyUsage            = clientAuth
 nsCertType                  = client, email
+nsComment                   = "OpenSSL Client Certificate"
 subjectKeyIdentifier        = hash
 authorityKeyIdentifier      = keyid,issuer
 crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
@@ -108,8 +114,9 @@ subjectAltName=${ENV::SAN}
 [ server_cert ]
 basicConstraints            = CA:FALSE
 keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
-nsComment                   = "OpenSSL Generated Server Certificate"
+extendedKeyUsage            = serverAuth, nsSGC, msSGC
 nsCertType                  = server
+nsComment                   = "OpenSSL Server Certificate"
 subjectKeyIdentifier        = hash
 authorityKeyIdentifier      = keyid,issuer
 crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
@@ -122,32 +129,3 @@ basicConstraints            = CA:FALSE
 keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
 extendedKeyUsage            = OCSPSigning
 subjectAltName=${ENV::SAN}
-
-# Extensions to add to a certificate request
-[ v3_req ]
-basicConstraints            = CA:FALSE
-keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
-subjectAltName=${ENV::SAN}
-
-# Extensions for a typical CA
-[ v3_ca ]
-subjectKeyIdentifier        = hash
-authorityKeyIdentifier      = keyid:always,issuer
-basicConstraints            = CA:TRUE
-keyUsage                    = cRLSign, keyCertSign
-nsCertType                  = sslCA, emailCA
-crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
-subjectAltName=${ENV::SAN}
-
-# CRL extensions.
-[ crl_ext ]
-authorityKeyIdentifier      = keyid:always
-
-# These extensions should be added when creating a proxy certificate
-[ proxy_cert_ext ]
-basicConstraints            = CA:FALSE
-nsComment                   = "OpenSSL Generated Certificate"
-subjectKeyIdentifier        = hash
-authorityKeyIdentifier      = keyid,issuer
-nsCaRevocationUrl           = http://$DOMAIN/ca.crl
-proxyCertInfo               = critical,language:id-ppl-anyLanguage,pathlen:3,policy:foo

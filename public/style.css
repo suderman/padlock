@@ -24,6 +24,10 @@ tr.new.ready td.name input { display: none; }
 tr.new.ready a { color: #428bca; }
 tr.new.ready a:hover { text-decoration: underline; }
 
+form.revoke.shift { display: none; }
+body.shift form.revoke { display: none; }
+body.shift form.revoke.shift { display: block; }
+
 form.revoke .form-group > div { padding-left: 7px; }
 
 @media only screen and (max-width : 320px) {
