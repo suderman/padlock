@@ -63,8 +63,7 @@ fi
 # Generate diffie hellman parameters (dh.pem)
 if hasnt $CA/root/dh.pem; then
   msg "Generate diffie hellman parameters (dh.pem)"
-  # openssl dhparam -out $CA/root/dh.pem 2048
-  openssl dhparam -out $CA/root/dh.pem 512
+  openssl dhparam -out $CA/root/dh.pem 2048
   chmod 400 $CA/root/dh.pem
 fi
 
