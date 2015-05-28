@@ -1,9 +1,7 @@
 // Toggle shift classname when holding shift key
 $(document).on('keyup keydown', function(e) {
   if (e.shiftKey) { 
-    $('body').addClass('shift');
-  } else { 
-    $('body').removeClass('shift');
+    $('body').toggleClass('shift');
   } 
 });
 
@@ -61,3 +59,27 @@ $('form.revoke').each(function(){
   });
 
 });
+
+
+$('tr.cert td a[href]').click(function(e) { 
+  if ($('body').hasClass('shift')) { 
+    e.preventDefault();
+    var href = $(this).attr('href');
+    var $td = $(this).closest('td');
+    if (($td.hasClass('pub')) || ($td.hasClass('sub')) || ($td.hasClass('p12')) || ($td.hasClass('ovpn'))) {
+      $.post($(this).attr('href'), function(response) {
+        $td.addClass('deleted');
+        console.log(resp);
+        alert(response);
+      });
+    } else if ($td.hasClass('name')) {
+      if (confirm("Are you sure you want to revoke this certificate?")) {
+        $.post($(this).attr('href'), function(response) {
+          $td.closest('tr.cert').remove();
+          alert(response);
+        });
+      }
+    }
+  }
+});
+

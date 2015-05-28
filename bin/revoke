@@ -12,14 +12,10 @@ if grep '^V.*'`printf '%q' "/CN=$NAME/"` $CA/db/index; then
   # Revoke the certificate
   openssl ca                                 \
     -revoke  "$CA/certs/$NAME/$NAME.crt"     \
-    -keyfile  $CA/root/ca.key                \
-    -cert     $CA/root/ca.crt                \
     -config   $CA/openssl.cnf
 
   # Regenerate the certificate revocation list
   openssl ca -gencrl                         \
-    -keyfile  $CA/root/ca.key                \
-    -cert     $CA/root/ca.crt                \
     -out      $CA/crl/ca.crl                 \
     -config   $CA/openssl.cnf
   openssl crl                                \

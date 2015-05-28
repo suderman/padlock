@@ -33,7 +33,7 @@ openssl ocsp                              \
 # If the response doesn't exist, it failed. 
 # Delete request and exit
 if hasnt "$CA/ocsp/responses/$FILENAME"; then
-  /bin/rm -f "$CA/ocsp/requests/$FILENAME"
+  rm -f "$CA/ocsp/requests/$FILENAME"
   exit 1
 fi
 
@@ -42,7 +42,7 @@ fi
 # Check if the request has a nonce (can't be cached)
 if [ "$(openssl ocsp -req_text -reqin "$CA/ocsp/requests/$FILENAME" | grep "OCSP Nonce")" ]; then
 
-  /bin/rm -f "$CA/ocsp/requests/$FILENAME"
+  rm -f "$CA/ocsp/requests/$FILENAME"
   exit 0
 
 # The request and response IS cacheable
@@ -51,8 +51,8 @@ else
 
   # Copy request & response to cache
   if [ "$FILENAME" != "$CACHED" ]; then
-    /bin/mv -f "$CA/ocsp/requests/$FILENAME" "$CA/ocsp/requests/$CACHED"
-    /bin/cp -f "$CA/ocsp/responses/$FILENAME" "$CA/ocsp/responses/$CACHED"
+    mv -f "$CA/ocsp/requests/$FILENAME" "$CA/ocsp/requests/$CACHED"
+    cp -f "$CA/ocsp/responses/$FILENAME" "$CA/ocsp/responses/$CACHED"
   fi
 
   exit 0

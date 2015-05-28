@@ -90,6 +90,32 @@ app.post('/:filename\.:filetype(crt|key|p12|pub|sub|ovpn|zip)', function(req, re
   }
 });
 
+// Revoke certicates on POST
+app.post('/:filename\.:filetype(crt|key|zip)', function(req, res) {
+  var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
+
+  // Revoke the certificate if it exists
+  if (test('-f', path)) {
+    exec(`${bin}/revoke '${req.params.filename}'`);
+    res.send(200, req.params.filename + ' is now revoked');
+  } else {
+    res.send(200, req.params.filename + " doesn't exist");
+  }
+});
+
+// Delete certicate's related files on POST
+app.post('/:filename\.:filetype(pub|sub|p12|ovpn)', function(req, res) {
+  var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
+
+  // Revoke the certificate if it exists
+  if (test('-f', path)) {
+    exec(`rm -rf '${req.params.filename}'`);
+    res.send(200, req.params.filename + ' is now deleted');
+  } else {
+    res.send(200, req.params.filename + " doesn't exist");
+  }
+});
+
 // Show index page
 app.get(/\/*/, function(req, res) {
   res.render('index.ejs', { 

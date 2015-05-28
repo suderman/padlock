@@ -21,8 +21,8 @@
 
       <div class="main shift">
         <h1><%= name %></h1>
-        <a class="btn btn-primary btn-lg" href="http://<%=domain%>/ca.sub">Root Certificate SUB</a>
-        <a class="btn btn-default btn-lg" href="http://<%=domain%>/ca.crl.pem">CRL PEM</a>
+        <a class="btn btn-primary btn-lg" href="http://<%=domain%>/ca.sub">CA sub</a>
+        <a class="btn btn-default btn-lg" href="http://<%=domain%>/ca.crl.pem">CRL pem</a>
         <% if (private) { %>
         <a class="btn btn-default btn-lg" href="http://<%=domain%>/dh.pem">DH</a>
         <% } %>
@@ -30,7 +30,7 @@
 
       <% if (private) { %>
         <h2>Client Certificates</h2>
-        <table class="table table-striped table-hover">
+        <table class="table table-striped table-hover client">
           <% if (certs.length) { %>
               <% certs.forEach(function(cert, index){ %>
               <% if ((cert != "") && (cert.indexOf('@') >= 0)) { %>
@@ -60,7 +60,7 @@
         </table>
 
         <h2>Server Certificates</h2>
-        <table class="table table-striped table-hover">
+        <table class="table table-striped table-hover server">
           <% if (certs.length) { %>
               <% certs.forEach(function(cert, index){ %>
               <% if ((cert != "") && (cert.indexOf('@') < 0)) { %>
@@ -90,7 +90,7 @@
         </table>
 
         <h2>Revoked Certificates</h2>
-        <table class="table table-striped table-hover">
+        <table class="table table-striped table-hover revoked">
           <% if (revoked.length) { %>
               <% revoked.forEach(function(cert, index){ %>
                 <% if (cert != "") { %>

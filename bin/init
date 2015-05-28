@@ -70,10 +70,10 @@ fi
 # Generate the certificate authority certificate
 if hasnt $CA/root/ca.crt; then
   msg "Generate the certificate authority certificate (ca.crt)"
-  openssl req -new -x509 -nodes -days 3650 -extensions v3_ca  \
-    -subj "$SUBJECT"                                          \
-    -key $CA/root/ca.key                                      \
-    -out $CA/root/ca.crt                                      \
+  openssl req -new -x509 -nodes -extensions v3_ca  \
+    -subj "$SUBJECT"                               \
+    -key $CA/root/ca.key                           \
+    -out $CA/root/ca.crt                           \
     -config $CA/openssl.cnf
 fi
 
@@ -105,21 +105,19 @@ fi
 # Generate the OCSP certificate signing request (ocsp.csr)
 if hasnt $CA/ocsp/ocsp.crt; then
   msg "Generate the OCSP certificate signing request (ocsp.csr)"
-  openssl req -new -extensions v3_OCSP                             \
-    -subj "$SUBJECT"                                               \
-    -key    $CA/ocsp/ocsp.key                                      \
-    -out    $CA/ocsp/ocsp.csr                                      \
+  openssl req -new -extensions v3_OCSP  \
+    -subj "$SUBJECT"                    \
+    -key    $CA/ocsp/ocsp.key           \
+    -out    $CA/ocsp/ocsp.csr           \
     -config $CA/openssl.cnf
 fi
 
 # Sign the request and create the certificate (ocsp.crt)
 if hasnt $CA/ocsp/ocsp.crt; then
   msg "Sign the request and create the certificate (ocsp.crt)"
-  yes | openssl ca -notext -md sha256 -days 3650 -extensions v3_OCSP \
-    -keyfile $CA/root/ca.key                                         \
-    -cert    $CA/root/ca.crt                                         \
-    -in      $CA/ocsp/ocsp.csr                                       \
-    -out     $CA/ocsp/ocsp.crt                                       \
+  yes | openssl ca -notext -extensions v3_OCSP \
+    -in      $CA/ocsp/ocsp.csr                 \
+    -out     $CA/ocsp/ocsp.crt                 \
     -config  $CA/openssl.cnf
   chmod 444  $CA/ocsp/ocsp.crt
   rm -f      $CA/ocsp/ocsp.csr
@@ -138,13 +136,11 @@ fi
 
 # Regenerate the certificate revocation list
 msg "Regenerate the certificate revocation list (ca.crl, ca.crl.pem)"
-openssl ca -gencrl                         \
-  -keyfile $CA/root/ca.key                 \
-  -cert    $CA/root/ca.crt                 \
-  -out     $CA/crl/ca.crl.pem              \
+openssl ca -gencrl              \
+  -out     $CA/crl/ca.crl.pem   \
   -config  $CA/openssl.cnf
-openssl crl                                \
-  -inform  PEM                             \
-  -outform DER                             \
-  -in      $CA/crl/ca.crl.pem              \
+openssl crl                     \
+  -inform  PEM                  \
+  -outform DER                  \
+  -in      $CA/crl/ca.crl.pem   \
   -out     $CA/crl/ca.crl

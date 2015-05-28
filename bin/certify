@@ -72,11 +72,9 @@ if ! grep '^V.*'`printf '%q' "/CN=$NAME/"` $CA/db/index; then
     fi
 
     # Create the certificate
-    yes | openssl ca -notext -md sha256 -days 3650 -extensions $ext \
-      -keyfile $CA/root/ca.key                                      \
-      -cert    $CA/root/ca.crt                                      \
-      -in      "$CA/certs/$NAME/$NAME.csr"                          \
-      -out     "$CA/certs/$NAME/$NAME.crt"                          \
+    yes | openssl ca -notext -extensions $ext \
+      -in      "$CA/certs/$NAME/$NAME.csr"    \
+      -out     "$CA/certs/$NAME/$NAME.crt"    \
       -config  $CA/openssl.cnf
     chmod 600 "$CA/certs/$NAME/$NAME.crt"
   fi
@@ -87,10 +85,10 @@ fi
 # Generate a p12 file from everything we just made ($NAME.p12)
 if hasnt "$CA/certs/$NAME/$NAME.p12"; then
   msg "Generate a p12 file from everything we just made ($NAME.p12)"
-  openssl pkcs12 -export -password pass:$NAME                   \
-    -certfile $CA/root/ca.crt                                   \
-    -inkey   "$CA/certs/$NAME/$NAME.key"                        \
-    -in      "$CA/certs/$NAME/$NAME.crt"                        \
+  openssl pkcs12 -export -password pass:$NAME \
+    -certfile $CA/root/ca.crt                 \
+    -inkey   "$CA/certs/$NAME/$NAME.key"      \
+    -in      "$CA/certs/$NAME/$NAME.crt"      \
     -out     "$CA/certs/$NAME/$NAME.p12"
 fi
 

@@ -12,11 +12,11 @@ crl_dir                     = $dir/crl            # Where the issued crl are kep
 database                    = $dir/db/index       # database index file.
 unique_subject              = yes                 # Set to 'no' to allow creation of several ctificates with same subject.
 new_certs_dir               = $dir/newcerts       # default place for new certs.
-certificate                 = $dir/root/ca.crt    # The CA certificate
+private_key                 = $dir/root/ca.key    # The CA's private key
+certificate                 = $dir/root/ca.crt    # The CA's certificate
 serial                      = $dir/db/serial      # The current serial number
 crlnumber                   = $dir/crl/crlnumber  # the current crl number must be commented out to leave a V1 CRL
 crl                         = $dir/crl/ca.crl     # The current CRL
-private_key                 = $dir/root/ca.key    # The private key
 RANDFILE                    = $dir/root/.rand     # private random number file
 x509_extensions             = usr_cert            # The extentions to add to the cert
 name_opt                    = ca_default          # Subject Name options
@@ -38,6 +38,8 @@ emailAddress                = optional
 
 [ req ]
 default_bits                = 2048
+default_md                  = sha256
+default_days                = 3650
 default_keyfile             = req.key
 distinguished_name          = req_distinguished_name
 attributes                  = req_attributes
