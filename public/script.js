@@ -64,12 +64,10 @@ $('form.revoke').each(function(){
 $('tr.cert td a[href]').click(function(e) { 
   if ($('body').hasClass('shift')) { 
     e.preventDefault();
-    var href = $(this).attr('href');
     var $td = $(this).closest('td');
     if (($td.hasClass('pub')) || ($td.hasClass('sub')) || ($td.hasClass('p12')) || ($td.hasClass('ovpn'))) {
       $.post($(this).attr('href'), function(response) {
         $td.addClass('deleted');
-        console.log(resp);
         alert(response);
       });
     } else if ($td.hasClass('name')) {
