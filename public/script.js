@@ -1,6 +1,6 @@
 // Toggle shift classname when holding shift key
-$(document).on('keyup keydown', function(e) {
-  if (e.shiftKey) { 
+$(document).keydown(function (e){
+  if (e.altKey) { 
     $('body').toggleClass('shift');
   } 
 });
@@ -19,7 +19,8 @@ $('tr.new.cert').each(function(){
       $tr.find('td.pub a').attr('href', '/' + name + '.pub');
       $tr.find('td.sub a').attr('href', '/' + name + '.sub');
       $tr.find('td.p12 a').attr('href', '/' + name + '.p12');
-      $tr.find('td.ovpn a').attr('href', '/' + name + '.ovpn');
+      $tr.find('td.tun a').attr('href', '/' + name + '.tun.ovpn');
+      $tr.find('td.tap a').attr('href', '/' + name + '.tap.ovpn');
       $tr.find('td.zip a').attr('href', '/' + name + '.zip');
     } else {
       $tr.removeClass('ready');
@@ -65,7 +66,7 @@ $('tr.cert td a[href]').click(function(e) {
   if ($('body').hasClass('shift')) { 
     e.preventDefault();
     var $td = $(this).closest('td');
-    if (($td.hasClass('pub')) || ($td.hasClass('sub')) || ($td.hasClass('p12')) || ($td.hasClass('ovpn'))) {
+    if (($td.hasClass('pub')) || ($td.hasClass('sub')) || ($td.hasClass('p12')) || ($td.hasClass('tun')) || ($td.hasClass('tap'))) {
       $.post($(this).attr('href'), function(response) {
         $td.addClass('deleted');
         alert(response);

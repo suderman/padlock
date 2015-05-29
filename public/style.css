@@ -34,7 +34,8 @@ form.revoke .form-group > div { padding-left: 7px; }
   tr.cert td.name span { display: none; }
   tr.cert td.sub { display: none; }
   tr.cert td.pub { display: none; }
-  tr.cert td.ovpn { display: none; }
+  tr.cert td.tun { display: none; }
+  tr.cert td.tap { display: none; }
   tr.cert td.zip { display: none; }
 }
 .clear { clear: both; height: 0; }
@@ -49,6 +50,7 @@ body.shift tr.cert td.key  a { color: #dddddd; cursor: not-allowed; text-decorat
 body.shift tr.cert td.pub  a { color: #e13350; }
 body.shift tr.cert td.sub  a { color: #e13350; }
 body.shift tr.cert td.p12  a { color: #e13350; }
-body.shift tr.cert td.ovpn a { color: #e13350; }
+body.shift tr.cert td.tun a { color: #e13350; }
+body.shift tr.cert td.tap a { color: #e13350; }
 body.shift tr.cert td.zip  a { color: #dddddd; cursor: not-allowed; text-decoration: none; }
 tr.cert td.deleted a { color: #dddddd !important; cursor: not-allowed; text-decoration: none; }

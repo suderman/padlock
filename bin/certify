@@ -99,39 +99,43 @@ if hasnt "$CA/certs/$NAME/$NAME.sub"; then
   echo ${SUBJECT##*subject= } > "$CA/certs/$NAME/$NAME.sub"
 fi
 
-# Create the ovpn ($NAME.ovpn)"
-OVPN="$CA/certs/$NAME/$NAME.ovpn"
-if hasnt "$OVPN"; then
+# Create the ovpn ($NAME.(tun|tap).ovpn)"
+for dev in tun tap; do
 
-  # Client profile
-  if [[ $NAME = *"@"* ]]; then
-    msg "Create client ovpn file ($NAME.ovpn)"
-    copy "$ROOT/templates/client.ovpn" $OVPN
-    DOMAIN="${NAME##*@}" deref $OVPN
+  OVPN="$CA/certs/$NAME/$NAME.$dev.ovpn"
+  if hasnt "$OVPN"; then
 
-  # Server profile
-  else
-    msg "Create server ovpn file ($NAME.ovpn)"
-    copy "$ROOT/templates/server.ovpn" $OVPN
-    echo "<dh>"                  >> $OVPN
-    cat  $CA/root/dh.pem         >> $OVPN
-    echo "</dh>"                 >> $OVPN
+    # Client profile
+    if [[ $NAME = *"@"* ]]; then
+      msg "Create client ovpn file ($NAME.$dev.ovpn)"
+      copy "$ROOT/templates/client.$dev.ovpn" $OVPN
+      DOMAIN="${NAME##*@}" deref $OVPN
+
+    # Server profile
+    else
+      msg "Create server ovpn file ($NAME.$dev.ovpn)"
+      copy "$ROOT/templates/server.$dev.ovpn" $OVPN
+      echo "<dh>"                  >> $OVPN
+      cat  $CA/root/dh.pem         >> $OVPN
+      echo "</dh>"                 >> $OVPN
+    fi
+
+    # Append key and cert info
+    echo "<key>"                   >> $OVPN
+    cat  $CA/certs/$NAME/$NAME.key >> $OVPN
+    echo "</key>"                  >> $OVPN
+    echo "<cert>"                  >> $OVPN
+    cat  $CA/certs/$NAME/$NAME.crt >> $OVPN
+    echo "</cert>"                 >> $OVPN
+    echo "<ca>"                    >> $OVPN
+    cat  $CA/root/ca.crt           >> $OVPN
+    echo "</ca>"                   >> $OVPN
+    echo "<tls-auth>"              >> $OVPN
+    cat  $CA/root/ta.key           >> $OVPN
+    echo "</tls-auth>"             >> $OVPN
   fi
 
-  # Append key and cert info
-  echo "<key>"                   >> $OVPN
-  cat  $CA/certs/$NAME/$NAME.key >> $OVPN
-  echo "</key>"                  >> $OVPN
-  echo "<cert>"                  >> $OVPN
-  cat  $CA/certs/$NAME/$NAME.crt >> $OVPN
-  echo "</cert>"                 >> $OVPN
-  echo "<ca>"                    >> $OVPN
-  cat  $CA/root/ca.crt           >> $OVPN
-  echo "</ca>"                   >> $OVPN
-  echo "<tls-auth>"              >> $OVPN
-  cat  $CA/root/ta.key           >> $OVPN
-  echo "</tls-auth>"             >> $OVPN
-fi
+done
 
 # Create a zip archive of everything ($NAME.zip)
 if hasnt "$CA/certs/$NAME/$NAME.zip"; then
