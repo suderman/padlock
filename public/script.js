@@ -66,7 +66,7 @@ $('tr.cert td a[href]').click(function(e) {
   if ($('body').hasClass('shift')) { 
     e.preventDefault();
     var $td = $(this).closest('td');
-    if (($td.hasClass('pub')) || ($td.hasClass('sub')) || ($td.hasClass('p12')) || ($td.hasClass('tun')) || ($td.hasClass('tap'))) {
+    if (($td.hasClass('pub')) || ($td.hasClass('sub')) || ($td.hasClass('p12')) || ($td.hasClass('tun')) || ($td.hasClass('tap')) || ($td.hasClass('zip'))) {
       $.post($(this).attr('href'), function(response) {
         $td.addClass('deleted');
         alert(response);

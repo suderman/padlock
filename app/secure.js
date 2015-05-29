@@ -78,7 +78,7 @@ app.get('/:filename\.:filetype(crt|key|p12|pub|sub|tun\.ovpn|tap\.ovpn|zip)', fu
 });
 
 // Revoke certicates on POST
-app.post('/:filename\.:filetype(crt|key|zip)', function(req, res) {
+app.post('/:filename\.:filetype(crt|key)', function(req, res) {
   var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Revoke the certificate if it exists
@@ -91,7 +91,7 @@ app.post('/:filename\.:filetype(crt|key|zip)', function(req, res) {
 });
 
 // Delete certicate's related files on POST
-app.post('/:filename\.:filetype(pub|sub|p12|tun\.ovpn|tap\.ovpn)', function(req, res) {
+app.post('/:filename\.:filetype(pub|sub|p12|tun\.ovpn|tap\.ovpn|zip)', function(req, res) {
   var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Revoke the certificate if it exists
