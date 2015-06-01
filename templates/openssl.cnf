@@ -82,7 +82,7 @@ basicConstraints            = critical, CA:TRUE
 keyUsage                    = cRLSign, keyCertSign
 extendedKeyUsage            = serverAuth, clientAuth
 nsCertType                  = sslCA, emailCA
-nsComment                   = "OpenSSL CA Certificate"
+nsComment                   = "Padlock Generated CA Certificate"
 subjectKeyIdentifier        = hash
 authorityKeyIdentifier      = keyid:always,issuer
 crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
@@ -91,9 +91,9 @@ subjectAltName=${ENV::SAN}
 # CRL extensions
 [ crl_ext ]
 basicConstraints            = CA:FALSE
-keyUsage                    = digitalSignature, keyEncipherment
-nsComment                   = "OpenSSL CRL"
 authorityKeyIdentifier      = keyid:always
+keyUsage                    = digitalSignature, keyEncipherment
+nsComment                   = "Padlock Generted CRL"
 
 # Extensions added when 'ca' signs a request
 [ usr_cert ]
@@ -102,12 +102,12 @@ basicConstraints            = CA:FALSE
 # Extensions added when 'ca' signs a client request
 [ client_cert ]
 basicConstraints            = CA:FALSE
-keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
-extendedKeyUsage            = clientAuth
-nsCertType                  = client, email
-nsComment                   = "OpenSSL Client Certificate"
 subjectKeyIdentifier        = hash
 authorityKeyIdentifier      = keyid,issuer
+extendedKeyUsage            = clientAuth
+keyUsage                    = digitalSignature
+nsCertType                  = client, email
+nsComment                   = "Padlock Generated Client Certificate"
 crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
 authorityInfoAccess         = OCSP;URI:http://$OCSP_DOMAIN
 subjectAltName=${ENV::SAN}
@@ -115,12 +115,12 @@ subjectAltName=${ENV::SAN}
 # Extensions added when 'ca' signs a server request
 [ server_cert ]
 basicConstraints            = CA:FALSE
-keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
-extendedKeyUsage            = serverAuth, nsSGC, msSGC
-nsCertType                  = server
-nsComment                   = "OpenSSL Server Certificate"
 subjectKeyIdentifier        = hash
 authorityKeyIdentifier      = keyid,issuer
+extendedKeyUsage            = serverAuth
+keyUsage                    = digitalSignature, keyEncipherment
+nsCertType                  = server
+nsComment                   = "Padlock Generated Server Certificate"
 crlDistributionPoints       = URI:http://$DOMAIN/ca.crl
 authorityInfoAccess         = OCSP;URI:http://$OCSP_DOMAIN
 subjectAltName=${ENV::SAN}
@@ -128,6 +128,6 @@ subjectAltName=${ENV::SAN}
 # Extensions for an OCSP server
 [ v3_OCSP ]
 basicConstraints            = CA:FALSE
-keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
 extendedKeyUsage            = OCSPSigning
+keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
 subjectAltName=${ENV::SAN}
