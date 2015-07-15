@@ -71,6 +71,7 @@ fi
 if hasnt $CA/root/ca.crt; then
   msg "Generate the certificate authority certificate (ca.crt)"
   openssl req -new -x509 -nodes -extensions v3_ca  \
+    -days 3650                                     \
     -subj "$SUBJECT"                               \
     -key $CA/root/ca.key                           \
     -out $CA/root/ca.crt                           \
