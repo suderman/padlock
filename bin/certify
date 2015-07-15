@@ -31,6 +31,30 @@ if hasnt "$CA/certs/$NAME/ca.crt"; then
   copy $CA/root/ca.crt "$CA/certs/$NAME/ca.crt"
 fi
 
+# Generate the TLS auth key (ta.key)
+generate_tls_auth_key() {
+  local NAME=$1
+  msg "Generate the TLS auth key ($NAME.ta)"
+  mkdir -p "$CA/certs/$NAME"
+  openvpn --genkey --secret "$CA/certs/$NAME/$NAME.ta"
+  chmod 400 "$CA/certs/$NAME/$NAME.ta"
+}
+
+# Server and Client ta files should match
+if hasnt "$CA/certs/$NAME/$NAME.ta"; then
+
+  # Server certificate
+  if [[ $NAME != *"@"* ]]; then
+    generate_tls_auth_key $NAME
+
+  # Client certificate
+  else
+    SNAME=${NAME##*@} # extract server name from client
+    has "$CA/certs/$SNAME/$SNAME.ta" || generate_tls_auth_key $SNAME
+    copy "$CA/certs/$SNAME/$SNAME.ta" "$CA/certs/$NAME/$NAME.ta"
+  fi
+fi
+
 # Generate the private/public key pair ($NAME.key)
 if hasnt "$CA/certs/$NAME/$NAME.key"; then
   msg "Generate the private/public key pair ($NAME.key)"
@@ -100,21 +124,21 @@ if hasnt "$CA/certs/$NAME/$NAME.sub"; then
 fi
 
 # Create the ovpn ($NAME.(tun|tap).ovpn)"
-for dev in tun tap; do
+for ext in ovpn tun.ovpn tap.ovpn; do
 
-  OVPN="$CA/certs/$NAME/$NAME.$dev.ovpn"
+  OVPN="$CA/certs/$NAME/$NAME.$ext"
   if hasnt "$OVPN"; then
 
     # Client profile
     if [[ $NAME = *"@"* ]]; then
-      msg "Create client ovpn file ($NAME.$dev.ovpn)"
-      copy "$ROOT/templates/client.$dev.ovpn" $OVPN
+      msg "Create client ovpn file ($NAME.$ext)"
+      copy "$ROOT/templates/client.$ext" $OVPN
       DOMAIN="${NAME##*@}" deref $OVPN
 
     # Server profile
     else
-      msg "Create server ovpn file ($NAME.$dev.ovpn)"
-      copy "$ROOT/templates/server.$dev.ovpn" $OVPN
+      msg "Create server ovpn file ($NAME.$ext)"
+      copy "$ROOT/templates/server.$ext" $OVPN
       echo "<dh>"                  >> $OVPN
       cat  $CA/root/dh.pem         >> $OVPN
       echo "</dh>"                 >> $OVPN
@@ -131,7 +155,7 @@ for dev in tun tap; do
     cat  $CA/root/ca.crt           >> $OVPN
     echo "</ca>"                   >> $OVPN
     echo "<tls-auth>"              >> $OVPN
-    cat  $CA/root/ta.key           >> $OVPN
+    cat  $CA/certs/$NAME/$NAME.ta  >> $OVPN
     echo "</tls-auth>"             >> $OVPN
   fi
 

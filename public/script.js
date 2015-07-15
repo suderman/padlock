@@ -19,6 +19,8 @@ $('tr.new.cert').each(function(){
       $tr.find('td.pub a').attr('href', '/' + name + '.pub');
       $tr.find('td.sub a').attr('href', '/' + name + '.sub');
       $tr.find('td.p12 a').attr('href', '/' + name + '.p12');
+      $tr.find('td.ta a').attr('href', '/' + name + '.ta');
+      $tr.find('td.ovpn a').attr('href', '/' + name + '.ovpn');
       $tr.find('td.tun a').attr('href', '/' + name + '.tun.ovpn');
       $tr.find('td.tap a').attr('href', '/' + name + '.tap.ovpn');
       $tr.find('td.zip a').attr('href', '/' + name + '.zip');
@@ -66,7 +68,7 @@ $('tr.cert td a[href]').click(function(e) {
   if ($('body').hasClass('shift')) { 
     e.preventDefault();
     var $td = $(this).closest('td');
-    if (($td.hasClass('pub')) || ($td.hasClass('sub')) || ($td.hasClass('p12')) || ($td.hasClass('tun')) || ($td.hasClass('tap')) || ($td.hasClass('zip'))) {
+    if (($td.hasClass('pub')) || ($td.hasClass('sub')) || ($td.hasClass('p12')) || ($td.hasClass('ovpn')) || ($td.hasClass('tun')) || ($td.hasClass('tap')) || ($td.hasClass('zip'))) {
       $.post($(this).attr('href'), function(response) {
         $td.addClass('deleted');
         alert(response);

@@ -53,13 +53,6 @@ if hasnt $CA/root/ca.key; then
   chmod 400 $CA/root/ca.key
 fi
 
-# Generate the TLS auth key (ta.key)
-if hasnt $CA/root/ta.key; then
-  msg "Generate the TLS auth key (ta.key)"
-  openvpn --genkey --secret $CA/root/ta.key
-  chmod 400 $CA/root/ta.key
-fi
-
 # Generate diffie hellman parameters (dh.pem)
 if hasnt $CA/root/dh.pem; then
   msg "Generate diffie hellman parameters (dh.pem)"
