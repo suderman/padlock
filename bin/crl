@@ -1,0 +1,17 @@
+#!/bin/bash
+source "$(cd "$(dirname $(dirname "${BASH_SOURCE[0]}"))" && pwd -P)/bin/config"
+
+# -------------------------------------------
+# Certificate Revocation List
+# -------------------------------------------
+
+# Regenerate the certificate revocation list
+msg "Regenerate the certificate revocation list (ca.crl, ca.crl.pem)"
+openssl ca -gencrl              \
+  -out     $CA/crl/ca.crl.pem   \
+  -config  $CA/openssl.cnf
+openssl crl                     \
+  -inform  PEM                  \
+  -outform DER                  \
+  -in      $CA/crl/ca.crl.pem   \
+  -out     $CA/crl/ca.crl

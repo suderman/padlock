@@ -14,4 +14,7 @@ if (! exec('bin/init').code) {
   require('./public');
   require('./secure');
   require('./ocsp');
+
+  // Refresh the CRL every hour
+  setInterval(function() { exec('bin/crl') }, 3600000);
 }
