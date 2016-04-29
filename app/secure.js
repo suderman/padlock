@@ -59,6 +59,20 @@ app.get('/dh.pem', function(req, res) {
   res.sendfile(`${ca}/root/dh.pem`);
 });
 
+// Send list of comma-separated values of revoked certificates on GET
+app.get('/revoked/:filename\.:filetype(csv)', function(req, res) {
+  var filename = req.params.filename.replace(/[^\w\.@\-\_]/gi,'').replace(/.csv$/,'');
+  var certs = exec(`cd ${ca}/revoked && ls -d *${filename}`, { silent: true }).output.split("\n");
+  res.send(200, certs.filter(Boolean).join(','));
+});
+
+// Send list of comma-separated values of certificates on GET
+app.get('/:filename\.:filetype(csv)', function(req, res) {
+  var filename = req.params.filename.replace(/[^\w\.@\-\_]/gi,'').replace(/.csv$/,'');
+  var certs = exec(`cd ${ca}/certs && ls -d *${filename}`, { silent: true }).output.split("\n");
+  res.send(200, certs.filter(Boolean).join(','));
+});
+
 // Send revoked certificates on GET
 app.get('/revoked/:filename\.:filetype(crt|key|p12|pub|txt|tun\.ovpn|tap\.ovpn|ovpn|ta|zip)', function(req, res) {
   var path = `${ca}/revoked/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
