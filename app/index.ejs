@@ -21,7 +21,8 @@
 
       <div class="main shift">
         <h1><%= name %></h1>
-        <a class="btn btn-primary btn-lg" href="http://<%=domain%>/ca.sub">CA sub</a>
+        <a class="btn btn-primary btn-lg" href="http://<%=domain%>/ca.txt">CA txt</a>
+        <a class="btn btn-default btn-lg" href="http://<%=domain%>/ca.crl.txt">CRL txt</a>
         <a class="btn btn-default btn-lg" href="http://<%=domain%>/ca.crl.pem">CRL pem</a>
         <% if (private) { %>
         <a class="btn btn-default btn-lg" href="http://<%=domain%>/dh.pem">DH</a>
@@ -39,7 +40,7 @@
                   <td  class="crt"><a href="/<%= cert %>.crt">crt</a></td>
                   <td  class="key"><a href="/<%= cert %>.key">key</a></td>
                   <td  class="pub"><a href="/<%= cert %>.pub">pub</a></td>
-                  <td  class="sub"><a href="/<%= cert %>.sub">sub</a></td>
+                  <td  class="txt"><a href="/<%= cert %>.txt">txt</a></td>
                   <td  class="p12"><a href="/<%= cert %>.p12">p12</a></td>
                   <td   class="ta"><a href="/<%= cert %>.ta">ta</a></td>
                   <td class="ovpn"><a href="/<%= cert %>.ovpn">ovpn</a></td>
@@ -55,7 +56,7 @@
             <td  class="crt"><a>crt</a></td>
             <td  class="key"><a>key</a></td>
             <td  class="pub"><a>pub</a></td>
-            <td  class="sub"><a>sub</a></td>
+            <td  class="txt"><a>txt</a></td>
             <td  class="p12"><a>p12</a></td>
             <td   class="ta"><a>ta</a></td>
             <td class="ovpn"><a>ovpn</a></td>
@@ -75,7 +76,7 @@
                   <td  class="crt"><a href="/<%= cert %>.crt">crt</a></td>
                   <td  class="key"><a href="/<%= cert %>.key">key</a></td>
                   <td  class="pub"><a href="/<%= cert %>.pub">pub</a></td>
-                  <td  class="sub"><a href="/<%= cert %>.sub">sub</a></td>
+                  <td  class="txt"><a href="/<%= cert %>.txt">txt</a></td>
                   <td  class="p12"><a href="/<%= cert %>.p12">p12</a></td>
                   <td   class="ta"><a href="/<%= cert %>.ta">ta</a></td>
                   <td class="ovpn"><a href="/<%= cert %>.ovpn">ovpn</a></td>
@@ -91,7 +92,7 @@
             <td  class="crt"><a>crt</a></td>
             <td  class="key"><a>key</a></td>
             <td  class="pub"><a>pub</a></td>
-            <td  class="sub"><a>sub</a></td>
+            <td  class="txt"><a>txt</a></td>
             <td  class="p12"><a>p12</a></td>
             <td   class="ta"><a>ta</a></td>
             <td class="ovpn"><a>ovpn</a></td>
@@ -111,7 +112,7 @@
                   <td  class="crt"><a href="/revoked/<%= cert %>.crt">crt</a></td>
                   <td  class="key"><a href="/revoked/<%= cert %>.key">key</a></td>
                   <td  class="pub"><a href="/revoked/<%= cert %>.pub">pub</a></td>
-                  <td  class="sub"><a href="/revoked/<%= cert %>.sub">sub</a></td>
+                  <td  class="txt"><a href="/revoked/<%= cert %>.txt">txt</a></td>
                   <td  class="p12"><a href="/revoked/<%= cert %>.p12">p12</a></td>
                   <td   class="ta"><a href="/revoked/<%= cert %>.ta">ta</a></td>
                   <td class="ovpn"><a href="/revoked/<%= cert %>.ovpn">ovpn</a></td>

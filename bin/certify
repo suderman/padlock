@@ -116,11 +116,10 @@ if hasnt "$CA/certs/$NAME/$NAME.p12"; then
     -out     "$CA/certs/$NAME/$NAME.p12"
 fi
 
-# Save the certificate's subject ($NAME.sub)
-if hasnt "$CA/certs/$NAME/$NAME.sub"; then
-  msg "Save the certificate's subject ($NAME.sub)"
-  SUBJECT=$(openssl x509 -noout -subject -in "$CA/certs/$NAME/$NAME.crt")
-  echo ${SUBJECT##*subject= } > "$CA/certs/$NAME/$NAME.sub"
+# Save the certificate in text format ($NAME.txt)
+if hasnt "$CA/certs/$NAME/$NAME.txt"; then
+  msg "Save the certificate in text format ($NAME.txt)"
+  openssl x509 -noout -text -in "$CA/certs/$NAME/$NAME.crt" > "$CA/certs/$NAME/$NAME.txt"
 fi
 
 # Create the ovpn ($NAME.(tun|tap).ovpn)"

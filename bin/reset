@@ -10,7 +10,7 @@ rm  -rf $ROOT/ca/ocsp
 rm  -rf $ROOT/ca/revoked
 rm  -rf $ROOT/ca/root/ca.crt
 rm  -rf $ROOT/ca/root/ca.key
-rm  -rf $ROOT/ca/root/ca.sub
+rm  -rf $ROOT/ca/root/ca.txt
 rm  -rf $ROOT/ca/root/ta.key
 
 msg "Rebuilding new CA directory"

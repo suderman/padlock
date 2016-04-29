@@ -32,7 +32,7 @@ form.revoke .form-group > div { padding-left: 7px; }
 
 @media only screen and (max-width : 320px) {
   tr.cert td.name span { display: none; }
-  tr.cert td.sub { display: none; }
+  tr.cert td.txt { display: none; }
   tr.cert td.pub { display: none; }
   tr.cert td.ta { display: none; }
   tr.cert td.ovpn { display: none; }
@@ -51,7 +51,7 @@ body.shift tr.cert td.crt  a { color: #dddddd; cursor: not-allowed; text-decorat
 body.shift tr.cert td.key  a { color: #dddddd; cursor: not-allowed; text-decoration: none; }
 body.shift tr.cert td.ta   a { color: #dddddd; cursor: not-allowed; text-decoration: none; }
 body.shift tr.cert td.pub  a { color: #e13350; }
-body.shift tr.cert td.sub  a { color: #e13350; }
+body.shift tr.cert td.txt  a { color: #e13350; }
 body.shift tr.cert td.p12  a { color: #e13350; }
 body.shift tr.cert td.ovpn a { color: #e13350; }
 body.shift tr.cert td.tun  a { color: #e13350; }

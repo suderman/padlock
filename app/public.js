@@ -29,6 +29,11 @@ app.get('/ca.crt', function(req, res) {
   res.sendfile(`${ca}/root/ca.crt`);
 });
 
+// Send the root certificate (txt)
+app.get('/ca.txt', function(req, res) {
+  res.sendfile(`${ca}/root/ca.txt`);
+});
+
 // Send the certificate revocation list
 app.get('/ca.crl', function(req, res) {
   res.sendfile(`${ca}/crl/ca.crl`);
@@ -37,6 +42,11 @@ app.get('/ca.crl', function(req, res) {
 // Send the certificate revocation list (pem)
 app.get('/ca.crl.pem', function(req, res) {
   res.sendfile(`${ca}/crl/ca.crl.pem`);
+});
+
+// Send the certificate revocation list (txt)
+app.get('/ca.crl.txt', function(req, res) {
+  res.sendfile(`${ca}/crl/ca.crl.txt`);
 });
 
 // Show index page

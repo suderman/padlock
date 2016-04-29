@@ -17,7 +17,7 @@ $('tr.new.cert').each(function(){
       $tr.find('td.crt a').attr('href', '/' + name + '.crt');
       $tr.find('td.key a').attr('href', '/' + name + '.key');
       $tr.find('td.pub a').attr('href', '/' + name + '.pub');
-      $tr.find('td.sub a').attr('href', '/' + name + '.sub');
+      $tr.find('td.txt a').attr('href', '/' + name + '.txt');
       $tr.find('td.p12 a').attr('href', '/' + name + '.p12');
       $tr.find('td.ta a').attr('href', '/' + name + '.ta');
       $tr.find('td.ovpn a').attr('href', '/' + name + '.ovpn');
@@ -68,14 +68,14 @@ $('tr.cert td a[href]').click(function(e) {
   if ($('body').hasClass('shift')) { 
     e.preventDefault();
     var $td = $(this).closest('td');
-    if (($td.hasClass('pub')) || ($td.hasClass('sub')) || ($td.hasClass('p12')) || ($td.hasClass('ovpn')) || ($td.hasClass('tun')) || ($td.hasClass('tap')) || ($td.hasClass('zip'))) {
+    if (($td.hasClass('pub')) || ($td.hasClass('txt')) || ($td.hasClass('p12')) || ($td.hasClass('ovpn')) || ($td.hasClass('tun')) || ($td.hasClass('tap')) || ($td.hasClass('zip'))) {
       $.post($(this).attr('href'), function(response) {
         $td.addClass('deleted');
         alert(response);
       });
     } else if ($td.hasClass('name')) {
       if (confirm("Are you sure you want to revoke this certificate?")) {
-        $.post($(this).attr('href'), function(response) {
+        $.post($(this).attr('href').replace('.zip','.crt'), function(response) {
           $td.closest('tr.cert').remove();
           alert(response);
         });

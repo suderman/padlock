@@ -71,13 +71,11 @@ if hasnt $CA/root/ca.crt; then
     -config $CA/openssl.cnf
 fi
 
-# Save the certificate authority certificate's subject
-if hasnt $CA/root/ca.sub; then
-  msg "Save the certificate authority certificate's subject (ca.sub)"
-  SUBJECT=$(openssl x509 -noout -subject -in $CA/root/ca.crt)
-  echo ${SUBJECT##*subject= } > $CA/root/ca.sub
+# Save the certificate authority certificate in text format
+if hasnt $CA/root/ca.txt; then
+  msg "Save the certificate authority certificate in text format (ca.txt)"
+  openssl x509 -noout -text -in $CA/root/ca.crt > $CA/root/ca.txt
 fi
-
 
 # -------------------------------------------
 # OCSP Responder
@@ -117,11 +115,10 @@ if hasnt $CA/ocsp/ocsp.crt; then
   rm -f      $CA/ocsp/ocsp.csr
 fi
 
-# Save the OCSP certificate's subject
-if hasnt $CA/ocsp/ocsp.sub; then
-  msg "Save the OCSP certificate's subject (ocsp.sub)"
-  SUBJECT=$(openssl x509 -noout -subject -in $CA/ocsp/ocsp.crt)
-  echo ${SUBJECT##*subject= } > $CA/ocsp/ocsp.sub
+# Save the OCSP certificate in text format
+if hasnt $CA/ocsp/ocsp.txt; then
+  msg "Save the OCSP certificate in text format (ocsp.txt)"
+  openssl x509 -noout -text -in $CA/ocsp/ocsp.crt > $CA/ocsp/ocsp.txt
 fi
 
 # Regenerate the certificate revocation list

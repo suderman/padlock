@@ -28,9 +28,9 @@ app.get('/ca.crt', function(req, res) {
   res.sendfile(`${ca}/root/ca.crt`);
 });
 
-// Send the root certificate's subject
-app.get('/ca.sub', function(req, res) {
-  res.sendfile(`${ca}/root/ca.sub`);
+// Send the root certificate (txt)
+app.get('/ca.txt', function(req, res) {
+  res.sendfile(`${ca}/root/ca.txt`);
 });
 
 // Send the certificate revocation list
@@ -43,8 +43,13 @@ app.get('/ca.crl.pem', function(req, res) {
   res.sendfile(`${ca}/crl/ca.crl.pem`);
 });
 
+// Send the certificate revocation list (txt)
+app.get('/ca.crl.txt', function(req, res) {
+  res.sendfile(`${ca}/crl/ca.crl.txt`);
+});
+
 // Nuke all certicates on CA POST
-app.post('/ca\.:filetype(crt|sub|crl|crl.pem)', function(req, res) {
+app.post('/ca\.:filetype(crt|txt|crl|crl.pem|crl.txt)', function(req, res) {
   exec(`${bin}/reset`);
   res.send(200, 'Certifcate Authority and all certificates deleted. Rebuilding new CA...');
 });
@@ -55,7 +60,7 @@ app.get('/dh.pem', function(req, res) {
 });
 
 // Send revoked certificates on GET
-app.get('/revoked/:filename\.:filetype(crt|key|p12|pub|sub|tun\.ovpn|tap\.ovpn|ovpn|ta|zip)', function(req, res) {
+app.get('/revoked/:filename\.:filetype(crt|key|p12|pub|txt|tun\.ovpn|tap\.ovpn|ovpn|ta|zip)', function(req, res) {
   var path = `${ca}/revoked/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Send the requested file
@@ -65,7 +70,7 @@ app.get('/revoked/:filename\.:filetype(crt|key|p12|pub|sub|tun\.ovpn|tap\.ovpn|o
 });
 
 // Sign/present certificates on GET
-app.get('/:filename\.:filetype(crt|key|p12|pub|sub|tun\.ovpn|tap\.ovpn|ovpn|ta|zip)', function(req, res) {
+app.get('/:filename\.:filetype(crt|key|p12|pub|txt|tun\.ovpn|tap\.ovpn|ovpn|ta|zip)', function(req, res) {
   var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Build the requested file if it doesn't exist
@@ -91,7 +96,7 @@ app.post('/:filename\.:filetype(crt|key)', function(req, res) {
 });
 
 // Delete certicate's related files on POST
-app.post('/:filename\.:filetype(pub|sub|p12|tun\.ovpn|tap\.ovpn|ovpn|zip)', function(req, res) {
+app.post('/:filename\.:filetype(pub|txt|p12|tun\.ovpn|tap\.ovpn|ovpn|zip)', function(req, res) {
   var path = `${ca}/certs/${req.params.filename}/${req.params.filename}.${req.params.filetype}`;
 
   // Revoke the certificate if it exists
